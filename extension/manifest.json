@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Pratibimb",
+  "version": "1.0",
+  "description": "Syncs your new tab with the Windows desktop wallpaper.",
+  "chrome_url_overrides": {
+    "newtab": "newtab.html"
+  },
+  "permissions": [
+    "nativeMessaging"
+  ]
+}
