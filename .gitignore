@@ -1,0 +1,12 @@
+# C++ Build Artifacts
+*.exe
+*.obj
+*.pdb
+*.ilk
+
+# VS Code / Visual Studio cache
+.vscode/
+.vs/
+
+# Ignore local paths in the host manifest during development
+host/com.suntzv.pratibimb.json
