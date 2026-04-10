@@ -6,6 +6,11 @@
 #include <io.h>
 #include <fcntl.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include "stb_image_write.h"
+
 using namespace std;
 
 static const string base64_chars = 
@@ -39,6 +44,12 @@ string base64_encode(const vector<unsigned char>& buf) {
     return ret;
 }
 
+void stbi_write_mem(void *context, void *data, int size) {
+    vector<unsigned char> *buf = static_cast<vector<unsigned char> *>(context);
+    unsigned char *ptr = static_cast<unsigned char *>(data);
+    buf->insert(buf->end(), ptr, ptr + size);
+}
+
 int main() {
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
@@ -64,8 +75,19 @@ int main() {
     }
 
     vector<unsigned char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
-
-    string base64Image = base64_encode(buffer);
+    
+    int width, height, channels;
+    unsigned char* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &width, &height, &channels, 3);
+    
+    string base64Image;
+    if (pixels) {
+        vector<unsigned char> compressed_buffer;
+        stbi_write_jpg_to_func(stbi_write_mem, &compressed_buffer, width, height, 3, pixels, 80);
+        stbi_image_free(pixels);
+        base64Image = base64_encode(compressed_buffer);
+    } else {
+        base64Image = base64_encode(buffer);
+    }
 
     size_t chunkSize = 500000; 
     for (size_t i = 0; i < base64Image.length(); i += chunkSize) {
