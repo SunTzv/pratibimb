@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <title>New Tab</title>
     <style>
-        /* Apply to HTML so it paints instantly, before the body exists */
         html {
             background-color: #000000;
             background-size: cover;
@@ -15,20 +14,9 @@
             margin: 0;
             padding: 0;
         }
-        body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-        }
+        body { margin: 0; padding: 0; width: 100%; height: 100%; }
     </style>
-    
-    <script>
-        const fastCache = localStorage.getItem('instantWallpaper');
-        if (fastCache) {
-            document.documentElement.style.backgroundImage = `url('${fastCache}')`;
-        }
-    </script>
+    <script src="fastload.js"></script>
 </head>
 <body>
     <script src="newtab.js"></script>

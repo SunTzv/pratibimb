@@ -8,7 +8,6 @@
 
 using namespace std;
 
-// Fast, self-contained Base64 Encoder
 static const string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
              "abcdefghijklmnopqrstuvwxyz"
@@ -41,45 +40,45 @@ string base64_encode(const vector<unsigned char>& buf) {
 }
 
 int main() {
-    // CRITICAL: Force binary mode so Windows doesn't corrupt the Native Messaging output
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 
-    // 1. Read the 32-bit message length from Brave
     unsigned int length = 0;
     cin.read(reinterpret_cast<char*>(&length), 4);
     if (length == 0) return 0;
 
-    // 2. Read the actual message payload (we discard it, but we must read it to clear the buffer)
     vector<char> msg(length);
     cin.read(msg.data(), length);
 
-    // 3. Locate the current Windows Wallpaper
     string appData = getenv("APPDATA");
     string wallpaperPath = appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
 
-    // 4. Read the image file
     ifstream file(wallpaperPath, ios::binary);
     if (!file) {
-        // If it fails, send an empty image so the browser doesn't crash
-        string err = "{\"image\": \"\"}";
+        string err = "{\"chunk\": \"\", \"done\": true}";
         unsigned int len = err.length();
         cout.write(reinterpret_cast<char*>(&len), 4);
         cout << err;
+        cout.flush();
         return 1;
     }
 
-    // Load file into a buffer
     vector<unsigned char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
 
-    // 5. Encode to Base64 and format as JSON
     string base64Image = base64_encode(buffer);
-    string jsonResponse = "{\"image\": \"data:image/jpeg;base64," + base64Image + "\"}";
 
-    // 6. Send the payload length, followed by the JSON payload back to Brave
-    unsigned int responseLength = jsonResponse.length();
-    cout.write(reinterpret_cast<char*>(&responseLength), 4);
-    cout << jsonResponse;
+    size_t chunkSize = 500000; 
+    for (size_t i = 0; i < base64Image.length(); i += chunkSize) {
+        string chunk = base64Image.substr(i, chunkSize);
+        bool isDone = (i + chunkSize >= base64Image.length());
+        
+        string jsonResponse = "{\"chunk\": \"" + chunk + "\", \"done\": " + (isDone ? "true" : "false") + "}";
+        
+        unsigned int responseLength = jsonResponse.length();
+        cout.write(reinterpret_cast<char*>(&responseLength), 4);
+        cout << jsonResponse;
+        cout.flush(); 
+    }
 
     return 0;
 }
