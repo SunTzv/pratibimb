@@ -24,13 +24,20 @@ echo     "chrome-extension://fnldepapgimkeegfohgdjnhjneoljcil/" >> "%MANIFEST_PA
 echo   ] >> "%MANIFEST_PATH%"
 echo } >> "%MANIFEST_PATH%"
 
-:: 3. Register the app specifically for Brave Browser
-REG ADD "HKCU\Software\BraveSoftware\Brave-Browser\NativeMessagingHosts\com.suntzv.pratibimb" /ve /t REG_SZ /d "%MANIFEST_PATH%" /f
+:: 3. Register the app for supported Chromium browsers
+for %%B in (
+    "HKCU\Software\Google\Chrome\NativeMessagingHosts"
+    "HKCU\Software\BraveSoftware\Brave-Browser\NativeMessagingHosts"
+    "HKCU\Software\Microsoft\Edge\NativeMessagingHosts"
+    "HKCU\Software\Chromium\NativeMessagingHosts"
+) do (
+    REG ADD "%%~B\com.suntzv.pratibimb" /ve /t REG_SZ /d "%MANIFEST_PATH%" /f >nul 2>&1
+)
 
 echo.
 echo ===================================================
 echo   Pratibimb Engine Successfully Installed!
 echo ===================================================
-echo Registry updated for Brave. You can now open a new tab!
+echo Native host registered for supported Chromium browsers.
 echo.
 pause

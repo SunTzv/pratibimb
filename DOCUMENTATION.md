@@ -1,12 +1,12 @@
 # Pratibimb Documentation
 
-Pratibimb is a Brave browser extension for Windows that syncs the Brave new tab background with the current Windows desktop wallpaper and dynamically themes the UI.
+Pratibimb is a Chromium browser extension for Windows that syncs the browser new tab background with the current Windows desktop wallpaper and dynamically themes the UI.
 
 ## Overview
 
 Pratibimb provides a custom new tab experience that:
 
-- Uses Brave native messaging to fetch the current Windows wallpaper.
+- Uses Chromium native messaging to fetch the current Windows wallpaper.
 - Displays a polished new tab page with a live clock, greeting, weather, and search bar.
 - Applies a dynamic color palette based on the wallpaper image for a cohesive look.
 - Caches the wallpaper and palette in `localStorage` for instant reloads.
@@ -17,7 +17,7 @@ Pratibimb provides a custom new tab experience that:
 
 - `manifest.json`
   - Chrome Manifest V3 configuration.
-  - Overrides Brave's new tab page with `newtab.html`.
+  - Overrides the browser new tab page with `newtab.html`.
   - Requests `nativeMessaging`, `storage`, and `unlimitedStorage` permissions.
   - Declares host permissions for weather, reverse geocoding, and Google search suggestions.
 
@@ -72,7 +72,7 @@ The extension installation expects this executable to exist at:
 
 - `host/pratibimb_host.exe`
 
-### Register native host for Brave
+### Register native host for Chromium browsers
 
 Run the installer batch script:
 
@@ -82,7 +82,7 @@ This script:
 
 - Determines the host directory path.
 - Writes `host/com.suntzv.pratibimb.json` with the correct executable path.
-- Registers the native messaging host in the Brave registry.
+- Registers the native messaging host for supported Chromium browsers, including Chrome, Brave, Edge, and Chromium.
 
 ### Uninstall
 
@@ -92,7 +92,7 @@ Remove the native host registration by running:
 
 ## Runtime flow
 
-1. Brave opens the custom `newtab.html` page.
+1. The browser opens the custom `newtab.html` page.
 2. `fastload.js` immediately applies cached wallpaper and palette if available.
 3. `ui.js` connects to the native host `com.suntzv.pratibimb`.
 4. The host reads the Windows wallpaper file and sends Base64 chunks.
@@ -123,16 +123,20 @@ Remove the native host registration by running:
 
 ## Notes
 
-- The project is designed specifically for Brave on Windows.
-- Native messaging requires registry registration for Brave.
+- The project is designed for Chromium-based browsers on Windows.
+- Native messaging requires registry registration for the browser.
 - The wallpaper source is the Windows theme wallpaper file.
 - `com.suntzv.pratibimb.json` is generated dynamically by the installer.
 
+> The native messaging manifest is bound to the extension origin. If the extension ID differs in a particular browser installation, update `allowed_origins` accordingly.
 ## Troubleshooting
 
 - If the wallpaper doesn't load, verify the native host executable exists and the manifest path is correct.
-- Confirm the registry key:
+- Confirm the registry key is present under the browser you are using, for example:
+  - `HKCU\Software\Google\Chrome\NativeMessagingHosts\com.suntzv.pratibimb`
   - `HKCU\Software\BraveSoftware\Brave-Browser\NativeMessagingHosts\com.suntzv.pratibimb`
+  - `HKCU\Software\Microsoft\Edge\NativeMessagingHosts\com.suntzv.pratibimb`
+  - `HKCU\Software\Chromium\NativeMessagingHosts\com.suntzv.pratibimb`
 - Make sure the extension ID in the native manifest matches the actual installed extension.
 
 ## Development
