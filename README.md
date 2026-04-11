@@ -40,30 +40,6 @@ Because Chromium browsers have strict security rules against sideloading local e
 
 ---
 
-## 🛠️ Building from Source (For Developers)
-
-If you want to compile the native host and the monolithic installer from scratch, you will need the **MinGW-w64 (GCC)** toolchain.
-
-**1. Build the Native Host**
-Compile your `main.cpp` into `host/pratibimb_host.exe`.
-
-**2. Package the Extension Payload**
-Compress all your extension files (HTML, JS, manifest) into a single file named `extension.zip` and place it in your root directory.
-
-**3. Compile the Installer Resources**
-Navigate to the `install/` directory and bake the `.exe` and `.zip` payloads into a binary resource file:
-```powershell
-windres resources.rc -O coff -o resources.res
-```
-
-**4. Compile the Final Monolithic Executable**
-Compile the GUI installer, linking all necessary Windows UI libraries statically so it runs on any machine:
-```powershell
-g++ -std=c++17 -O2 installer.cpp resources.res -o Pratibimb_Setup.exe -mwindows -municode -lcomctl32 -lole32 -ladvapi32 -lshell32 -ldwmapi -luuid -static -static-libgcc -static-libstdc++
-```
-
----
-
 ## 🗑️ Uninstallation
 
 Pratibimb leaves zero trace when uninstalled. 
