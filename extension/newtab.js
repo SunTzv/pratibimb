@@ -43,28 +43,28 @@ port.onMessage.addListener(function(msg) {
                     let cssVars = "";
                     if (isLight) {
                         cssVars = `
-                            --text-primary: hsl(${h}, 10%, 10%);
-                            --text-muted: hsl(${h}, 10%, 35%);
-                            --text-faint: hsl(${h}, 10%, 50%);
-                            --accent: hsl(${h}, 90%, 35%);
-                            --accent-glow: hsla(${h}, 90%, 35%, 0.25);
-                            --surface: hsla(${h}, 10%, 95%, 0.65); /* 65% opacity for readability */
-                            --surface-hover: hsla(${h}, 10%, 100%, 0.85);
-                            --border: hsla(${h}, 20%, 0%, 0.15);
-                            --border-focus: hsla(${h}, 90%, 35%, 0.50);
+                            --text-primary: rgba(0, 0, 0, 0.90);
+                            --text-muted: rgba(0, 0, 0, 0.65);
+                            --text-faint: rgba(0, 0, 0, 0.40);
+                            --accent: hsl(${h}, 85%, 35%);
+                            --accent-glow: hsla(${h}, 85%, 35%, 0.25);
+                            --surface: rgba(255, 255, 255, 0.35); /* Neutral white glass */
+                            --surface-hover: rgba(255, 255, 255, 0.55);
+                            --border: rgba(0, 0, 0, 0.15);
+                            --border-focus: hsla(${h}, 85%, 35%, 0.60);
                             background-color: rgb(${r}, ${g}, ${b});
                         `;
                     } else {
                         cssVars = `
-                            --text-primary: hsl(${h}, 10%, 98%);
-                            --text-muted: hsl(${h}, 10%, 75%);
-                            --text-faint: hsl(${h}, 10%, 60%);
-                            --accent: hsl(${h}, 90%, 75%);
-                            --accent-glow: hsla(${h}, 90%, 75%, 0.25);
-                            --surface: hsla(${h}, 15%, 5%, 0.65); /* 65% opacity for readability */
-                            --surface-hover: hsla(${h}, 15%, 10%, 0.85);
-                            --border: hsla(${h}, 20%, 100%, 0.15);
-                            --border-focus: hsla(${h}, 90%, 75%, 0.50);
+                            --text-primary: rgba(255, 255, 255, 0.95);
+                            --text-muted: rgba(255, 255, 255, 0.60);
+                            --text-faint: rgba(255, 255, 255, 0.35);
+                            --accent: hsl(${h}, 85%, 70%);
+                            --accent-glow: hsla(${h}, 85%, 70%, 0.25);
+                            --surface: rgba(0, 0, 0, 0.40); /* Neutral smoked glass */
+                            --surface-hover: rgba(0, 0, 0, 0.60);
+                            --border: rgba(255, 255, 255, 0.15);
+                            --border-focus: hsla(${h}, 85%, 70%, 0.60);
                             background-color: rgb(${r}, ${g}, ${b});
                         `;
                     }
