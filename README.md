@@ -1,6 +1,10 @@
 # 🔁 Pratibimb
 
-***
+---
+
+### ⚡ **Jump to:** [**Features**](#-features) • [**Installation**](#-installation) • [**Uninstallation**](#-uninstallation) • [**Architecture**](#-architecture)
+
+---
 
 > *Sync your wallpapers in style.*
 
@@ -21,7 +25,7 @@ Powered by a lightning-fast C++ Native Messaging host and a zero-config native i
 
 ## 🚀 Installation
 
-[`Download the Setup File here`](install/Pratibimb_Setup.exe)
+[![Download Pratibimb](https://img.shields.io/badge/Download-Pratibimb__Setup.exe-0078D4?style=for-the-badge&logo=windows)](install/Pratibimb_Setup.exe)
 
 Because Chromium browsers have strict security rules against sideloading local extensions, installation is a quick two-step process to ensure everything links securely.
 
