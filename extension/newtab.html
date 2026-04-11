@@ -13,15 +13,15 @@
             --text-muted: rgba(255, 255, 255, 0.70);
             --text-faint: rgba(255, 255, 255, 0.45);
             --text-shadow-color: rgba(0, 0, 0, 0.60);
-            --accent: hsl(35, 85%, 70%);
-            --accent-glow: hsla(35, 85%, 70%, 0.35);
-            --accent-neon: hsl(35, 85%, 70%);
+            --accent: hsl(210, 85%, 70%);
+            --accent-glow: hsla(210, 85%, 70%, 0.35);
+            --accent-neon: hsl(210, 85%, 70%);
             --surface: rgba(0, 0, 0, 0.35);
             --surface-hover: rgba(0, 0, 0, 0.55);
             --border: rgba(255, 255, 255, 0.20);
-            --border-focus: hsla(35, 85%, 70%, 0.70);
+            --border-focus: hsla(210, 85%, 70%, 0.70);
             --shadow-base: rgba(0, 0, 0, 0.70);
-            --blur: blur(24px) saturate(120%);
+            --blur: blur(28px) saturate(140%);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -77,15 +77,15 @@
             line-height: 0.9;
             letter-spacing: -3px;
             color: var(--text-primary);
-            text-shadow: 0 8px 32px var(--shadow-base), 0 2px 6px var(--text-shadow-color);
+            text-shadow: 0 8px 32px var(--shadow-base), 0 2px 8px var(--text-shadow-color);
         }
         .nt-time em {
             font-style: normal;
             color: var(--accent);
             animation: blink 1s step-end infinite;
-            text-shadow: 0 0 20px var(--accent-glow);
+            text-shadow: 0 0 24px var(--accent-glow);
         }
-        @keyframes blink { 50% { opacity: 0.3; } }
+        @keyframes blink { 50% { opacity: 0.4; } }
 
         .nt-date {
             margin-top: 8px;
@@ -166,22 +166,22 @@
             caret-color: var(--accent-neon);
             outline: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 12px 40px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.15);
+            box-shadow: 0 12px 40px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.25);
             text-shadow: 0 1px 4px var(--text-shadow-color);
         }
         .nt-search::placeholder { color: var(--text-faint); transition: opacity 0.3s; }
         .nt-search:focus::placeholder { opacity: 0; }
         
-        /* DEEP DARK CONSOLE FOCUS */
+        /* DEEP DARK CONSOLE FOCUS (Smoked glass, not solid black) */
         .nt-search:focus {
-            background: rgba(0, 0, 0, 0.85); 
+            background: rgba(0, 0, 0, 0.45); 
             border-color: var(--accent-neon);
             color: var(--accent-neon); 
             text-shadow: 0 0 12px var(--accent-neon); 
             box-shadow: 
                 0 0 0 1px var(--accent-neon), 
-                0 24px 64px rgba(0,0,0,0.9), 
-                inset 0 4px 24px rgba(0,0,0,0.9);
+                0 24px 64px rgba(0,0,0,0.6), 
+                inset 0 4px 24px rgba(0,0,0,0.5);
         }
 
         .nt-engine-badge {
@@ -202,7 +202,7 @@
             position: absolute;
             top: calc(100% + 8px);
             left: 0; right: 0;
-            background: rgba(0, 0, 0, 0.85); 
+            background: rgba(0, 0, 0, 0.65); 
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--accent-neon);
@@ -210,7 +210,7 @@
             overflow: hidden;
             z-index: 200;
             display: none;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.9);
+            box-shadow: 0 16px 40px rgba(0,0,0,0.6);
             animation: fadeIn 0.2s ease-out forwards;
         }
         .nt-sugs.open { display: block; }
@@ -271,40 +271,40 @@
             background: var(--surface);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border-focus); 
+            border: 1px solid var(--border); 
             border-radius: 6px;
             font-family: 'DM Mono', monospace;
             font-size: 10.5px;
             font-weight: 400;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--accent); 
-            text-shadow: 0 0 12px var(--accent-glow); 
+            color: var(--text-primary); 
             text-decoration: none;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
-            box-shadow: 0 8px 24px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.15), 0 0 12px var(--accent-glow);
+            box-shadow: 0 8px 24px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.25);
+            text-shadow: 0 1px 4px var(--text-shadow-color);
         }
         
         /* HOVER BUTTONS */
         .nt-link:hover {
-            background: var(--accent); 
+            background: var(--surface-hover);
             border-color: var(--accent);
-            color: #050505; 
-            transform: translateY(-4px) scale(1.03); 
-            box-shadow: 0 16px 40px var(--accent-glow), inset 0 1px 1px rgba(255,255,255,0.4);
-            text-shadow: none; 
+            color: var(--accent);
+            transform: translateY(-3px); 
+            box-shadow: 0 12px 32px var(--accent-glow), inset 0 1px 1px rgba(255,255,255,0.3);
+            text-shadow: 0 0 12px var(--accent-glow);
         }
 
         .nt-link svg { 
             flex-shrink: 0; 
             transition: all 0.25s;
-            filter: drop-shadow(0 0 8px var(--accent-glow)); 
+            filter: drop-shadow(0 2px 4px var(--text-shadow-color));
         }
         
         .nt-link:hover svg {
-            filter: none; 
+            filter: drop-shadow(0 0 8px var(--accent-glow));
         }
 
         .nt-greeting {
