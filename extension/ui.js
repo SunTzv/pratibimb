@@ -1,7 +1,50 @@
+/* ── GREETINGS DATABASE ── */
+const GREETINGS = {
+    lateNight: [
+        "burning the midnight oil.",
+        "the quiet hours.",
+        "still awake?",
+        "the world sleeps."
+    ],
+    morning: [
+        "good morning.",
+        "rise and shine.",
+        "a fresh start.",
+        "let us begin."
+    ],
+    afternoon: [
+        "good afternoon.",
+        "steady pace.",
+        "keep the momentum.",
+        "halfway there."
+    ],
+    evening: [
+        "good evening.",
+        "winding down.",
+        "twilight hours.",
+        "almost done."
+    ],
+    night: [
+        "good night.",
+        "time to rest.",
+        "lights out.",
+        "system standby."
+    ]
+};
+
 /* ── CLOCK (Optimized DOM Repaints) ── */
 const DAYS   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 let lastTimeStr = "";
+let currentPeriod = "";
+
+function getPeriod(hr) {
+    if (hr < 5)  return 'lateNight';
+    if (hr < 12) return 'morning';
+    if (hr < 17) return 'afternoon';
+    if (hr < 21) return 'evening';
+    return 'night';
+}
 
 function tick() {
     const n = new Date();
@@ -16,17 +59,21 @@ function tick() {
             `${DAYS[n.getDay()]} · ${MONTHS[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
         
         const hr = n.getHours();
-        document.getElementById('nt-greeting').textContent = 
-            hr < 5  ? 'burning the midnight oil.' : 
-            hr < 12 ? 'good morning.'   : 
-            hr < 17 ? 'good afternoon.' : 
-            hr < 21 ? 'good evening.'   : 'good night.';
+        const period = getPeriod(hr);
+        
+        // Only pick a new random greeting if the time period changed (or on first load)
+        if (period !== currentPeriod) {
+            const options = GREETINGS[period];
+            const randomGreeting = options[Math.floor(Math.random() * options.length)];
+            document.getElementById('nt-greeting').textContent = randomGreeting;
+            currentPeriod = period;
+        }
             
         lastTimeStr = timeStr;
     }
 }
 tick(); 
-setInterval(tick, 1000); // Safe to run every second because of the repaint check
+setInterval(tick, 1000);
 
 /* ── WEATHER (Aggressive 30-Min Caching) ── */
 const WX = {
@@ -150,4 +197,16 @@ document.addEventListener('click', e => { if(!document.getElementById('nt-swrap'
 inp.focus();
 document.addEventListener('keydown', e => {
     if(e.key.length===1 && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement!==inp) inp.focus();
+});
+
+/* ── INTERNAL LINKS (Bypass Chromium Security Block) ── */
+document.querySelectorAll('.nt-link').forEach(link => {
+    link.addEventListener('click', e => {
+        e.preventDefault(); 
+        const url = link.getAttribute('href');
+        
+        if (chrome && chrome.tabs) {
+            chrome.tabs.update({ url: url });
+        }
+    });
 });

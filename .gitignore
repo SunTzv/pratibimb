@@ -10,6 +10,8 @@
 
 # Ignore local paths in the host manifest during development
 host/com.suntzv.pratibimb.json
+extension.pem
+extension.crx
 
-# git
-bruh.bat
+
+#install/pratibimb_installer.exe

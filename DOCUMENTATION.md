@@ -72,23 +72,35 @@ The extension installation expects this executable to exist at:
 
 - `host/pratibimb_host.exe`
 
-### Register native host for Chromium browsers
+### Install native host and extension support
 
-Run the installer batch script:
+Run the installer executable directly:
 
-- `install\install_host.bat`
+- `install\pratibimb_installer.exe`
 
-This script:
+If `install\pratibimb_installer.exe` is not present, compile `install\installer.cpp` locally or ship a prebuilt `install\pratibimb_installer.exe` so end users do not need a compiler.
 
-- Determines the host directory path.
-- Writes `host/com.suntzv.pratibimb.json` with the correct executable path.
-- Registers the native messaging host for supported Chromium browsers, including Chrome, Brave, Edge, and Chromium.
+The repository ignores compiled binaries and extension packaging files, so you may keep `install\pratibimb_installer.exe`, `extension.crx`, and `extension.pem` locally for packaging without checking them into Git.
+
+`install\installer.exe` provides a clean GUI that can:
+
+- Install the native messaging backend.
+- Uninstall the native messaging backend.
+- Register the native host for supported Chromium browsers.
+- Optionally install the extension into selected browsers by path. This can be either a local unpacked extension folder or a `.crx` package, so users do not need to enable developer mode.
+
+Supported browsers include:
+
+- Google Chrome
+- Brave
+- Microsoft Edge
+- Chromium
+- Opera
+- Vivaldi
 
 ### Uninstall
 
-Remove the native host registration by running:
-
-- `install\uninstall_host.bat`
+Use the `Uninstall` option inside `install\pratibimb_installer.exe` to remove native host registration and extension entries from selected browsers.
 
 ## Runtime flow
 
@@ -116,8 +128,8 @@ Remove the native host registration by running:
   - `com.suntzv.pratibimb.json`
 
 - `install/`
-  - `install_host.bat`
-  - `uninstall_host.bat`
+  - `installer.cpp`
+  - `pratibimb_installer.exe` (built installer)
 
 - `bruh.bat`
 
@@ -137,6 +149,8 @@ Remove the native host registration by running:
   - `HKCU\Software\BraveSoftware\Brave-Browser\NativeMessagingHosts\com.suntzv.pratibimb`
   - `HKCU\Software\Microsoft\Edge\NativeMessagingHosts\com.suntzv.pratibimb`
   - `HKCU\Software\Chromium\NativeMessagingHosts\com.suntzv.pratibimb`
+  - `HKCU\Software\Opera Software\Opera Stable\NativeMessagingHosts\com.suntzv.pratibimb`
+  - `HKCU\Software\Vivaldi\Vivaldi\NativeMessagingHosts\com.suntzv.pratibimb`
 - Make sure the extension ID in the native manifest matches the actual installed extension.
 
 ## Development
