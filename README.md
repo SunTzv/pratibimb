@@ -21,6 +21,8 @@ Powered by a lightning-fast C++ Native Messaging host and a zero-config native i
 
 ## 🚀 Installation
 
+[`Download the Setup File here`](install/Pratibimb_Setup.exe)
+
 Because Chromium browsers have strict security rules against sideloading local extensions, installation is a quick two-step process to ensure everything links securely.
 
 ### Step 1: Run the Installer
