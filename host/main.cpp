@@ -5,6 +5,7 @@
 #include <cstdlib>
 #include <io.h>
 #include <fcntl.h>
+#include <cstdint> // Required for uint32_t
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -12,6 +13,15 @@
 #include "stb_image_write.h"
 
 using namespace std;
+
+// --- THE SAFE WRITER ---
+// Always use raw binary writes for BOTH the header and the payload.
+void sendMessage(const string& jsonResponse) {
+    uint32_t len = static_cast<uint32_t>(jsonResponse.length());
+    cout.write(reinterpret_cast<const char*>(&len), 4);
+    cout.write(jsonResponse.c_str(), len);
+    cout.flush();
+}
 
 static const string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -51,55 +61,55 @@ void stbi_write_mem(void *context, void *data, int size) {
 }
 
 int main() {
+    // Force Binary Mode to prevent Windows from turning \n into \r\n
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
 
-    unsigned int length = 0;
-    cin.read(reinterpret_cast<char*>(&length), 4);
-    if (length == 0) return 0;
-
-    vector<char> msg(length);
-    cin.read(msg.data(), length);
-
-    string appData = getenv("APPDATA");
-    string wallpaperPath = appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
-
-    ifstream file(wallpaperPath, ios::binary);
-    if (!file) {
-        string err = "{\"chunk\": \"\", \"done\": true}";
-        unsigned int len = err.length();
-        cout.write(reinterpret_cast<char*>(&len), 4);
-        cout << err;
-        cout.flush();
-        return 1;
-    }
-
-    vector<unsigned char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+    uint32_t length = 0;
     
-    int width, height, channels;
-    unsigned char* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &width, &height, &channels, 3);
-    
-    string base64Image;
-    if (pixels) {
-        vector<unsigned char> compressed_buffer;
-        stbi_write_jpg_to_func(stbi_write_mem, &compressed_buffer, width, height, 3, pixels, 80);
-        stbi_image_free(pixels);
-        base64Image = base64_encode(compressed_buffer);
-    } else {
-        base64Image = base64_encode(buffer);
-    }
+    // --- THE HEARTBEAT LOOP ---
+    // This keeps the host alive as long as the browser port is open.
+    // It only exits when the browser drops the connection (cin fails).
+    while (cin.read(reinterpret_cast<char*>(&length), 4)) {
+        if (length == 0) continue;
 
-    size_t chunkSize = 500000; 
-    for (size_t i = 0; i < base64Image.length(); i += chunkSize) {
-        string chunk = base64Image.substr(i, chunkSize);
-        bool isDone = (i + chunkSize >= base64Image.length());
+        // Clear the incoming message from the buffer
+        vector<char> msg(length);
+        cin.read(msg.data(), length);
+
+        string appData = getenv("APPDATA");
+        string wallpaperPath = appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
+
+        ifstream file(wallpaperPath, ios::binary);
+        if (!file) {
+            sendMessage("{\"chunk\": \"\", \"done\": true, \"error\": \"not_found\"}");
+            continue;
+        }
+
+        vector<unsigned char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+        file.close(); // Close immediately to free memory
         
-        string jsonResponse = "{\"chunk\": \"" + chunk + "\", \"done\": " + (isDone ? "true" : "false") + "}";
+        int width, height, channels;
+        unsigned char* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &width, &height, &channels, 3);
         
-        unsigned int responseLength = jsonResponse.length();
-        cout.write(reinterpret_cast<char*>(&responseLength), 4);
-        cout << jsonResponse;
-        cout.flush(); 
+        string base64Image;
+        if (pixels) {
+            vector<unsigned char> compressed_buffer;
+            stbi_write_jpg_to_func(stbi_write_mem, &compressed_buffer, width, height, 3, pixels, 80);
+            stbi_image_free(pixels);
+            base64Image = base64_encode(compressed_buffer);
+        } else {
+            base64Image = base64_encode(buffer);
+        }
+
+        size_t chunkSize = 500000; 
+        for (size_t i = 0; i < base64Image.length(); i += chunkSize) {
+            string chunk = base64Image.substr(i, chunkSize);
+            bool isDone = (i + chunkSize >= base64Image.length());
+            
+            string jsonResponse = "{\"chunk\": \"" + chunk + "\", \"done\": " + (isDone ? "true" : "false") + "}";
+            sendMessage(jsonResponse);
+        }
     }
 
     return 0;
