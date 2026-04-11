@@ -1,0 +1,5 @@
+#define IDR_HOST_EXE 101
+#define IDR_EXT_ZIP 102
+
+IDR_HOST_EXE RCDATA "../host/pratibimb_host.exe"
+IDR_EXT_ZIP RCDATA "../extension.zip"

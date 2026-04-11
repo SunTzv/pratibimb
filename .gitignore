@@ -1,5 +1,4 @@
 # C++ Build Artifacts
-*.exe
 *.obj
 *.pdb
 *.ilk
@@ -10,8 +9,4 @@
 
 # Ignore local paths in the host manifest during development
 host/com.suntzv.pratibimb.json
-extension.pem
-extension.crx
-
-
-#install/pratibimb_installer.exe
+extension.zip
