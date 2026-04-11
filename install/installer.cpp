@@ -1,3 +1,6 @@
+#define UNICODE
+#define _UNICODE
+
 #pragma comment(linker, "\"/manifestdependency:type='win32' name='Microsoft.Windows.Common-Controls' version='6.0.0.0' processorArchitecture='*' publicKeyToken='6595b64144ccf1df' language='*'\"")
 
 #include <windows.h>
@@ -7,6 +10,7 @@
 #include <vector>
 #include <fstream>
 #include <filesystem>
+#include <stdint.h>
 
 #ifndef DWMWA_USE_IMMERSIVE_DARK_MODE
 #define DWMWA_USE_IMMERSIVE_DARK_MODE 20
@@ -139,11 +143,9 @@ bool PerformInstall(HWND parent) {
 
     bool success = true;
     for (int idx : selected) {
-        // 1. Install Native Host
         std::wstring nmKey = browsers[idx].nativeRoot + L"\\com.suntzv.pratibimb";
         if (!WriteRegistryValue(nmKey, L"", manifestPath)) success = false;
         
-        // 2. Sideload Extension
         std::wstring extKey = browsers[idx].extRoot + L"\\" + EXTENSION_ID;
         if (!WriteRegistryValue(extKey, L"", crxPath)) success = false;
         if (!WriteRegistryValue(extKey, L"path", crxPath)) success = false;
@@ -176,11 +178,9 @@ bool PerformUninstall(HWND parent) {
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     switch (uMsg) {
         case WM_CREATE: {
-            // Enable Dark Mode Title Bar
             BOOL dark = TRUE;
             DwmSetWindowAttribute(hwnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &dark, sizeof(dark));
 
-            // Setup Custom Fonts & Deep Dark Background
             g_hbrBackground = CreateSolidBrush(RGB(18, 18, 18));
             g_hFontTitle = CreateFontW(32, 0, 0, 0, FW_LIGHT, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Segoe UI Light");
             g_hFont = CreateFontW(16, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, DEFAULT_PITCH | FF_SWISS, L"Segoe UI");
@@ -189,27 +189,28 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             HWND hTitle = CreateWindowW(L"STATIC", L"PRATIBIMB", WS_VISIBLE | WS_CHILD | SS_CENTER, 10, 20, 360, 40, hwnd, nullptr, nullptr, nullptr);
             SendMessageW(hTitle, WM_SETFONT, (WPARAM)g_hFontTitle, TRUE);
 
-            HWND hRadioInst = CreateWindowW(L"BUTTON", L"Install", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, 90, 80, 80, 24, hwnd, (HMENU)IDC_INSTALL_RADIO, nullptr, nullptr);
-            HWND hRadioUninst = CreateWindowW(L"BUTTON", L"Uninstall", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 200, 80, 100, 24, hwnd, (HMENU)IDC_UNINSTALL_RADIO, nullptr, nullptr);
+            // GCC strict cast: HMENU must be cast via intptr_t
+            HWND hRadioInst = CreateWindowW(L"BUTTON", L"Install", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON | WS_GROUP, 90, 80, 80, 24, hwnd, (HMENU)(intptr_t)IDC_INSTALL_RADIO, nullptr, nullptr);
+            HWND hRadioUninst = CreateWindowW(L"BUTTON", L"Uninstall", WS_VISIBLE | WS_CHILD | BS_AUTORADIOBUTTON, 200, 80, 100, 24, hwnd, (HMENU)(intptr_t)IDC_UNINSTALL_RADIO, nullptr, nullptr);
             SendMessageW(hRadioInst, WM_SETFONT, (WPARAM)g_hFont, TRUE);
             SendMessageW(hRadioUninst, WM_SETFONT, (WPARAM)g_hFont, TRUE);
             SendMessageW(hRadioInst, BM_SETCHECK, BST_CHECKED, 0);
 
             for (int i = 0; i < 6; ++i) {
-                g_browserCheckboxes[i] = CreateWindowW(L"BUTTON", browsers[i].name.c_str(), WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 60, 130 + (25 * i), 160, 22, hwnd, (HMENU)(IDC_BROWSER_BASE + i), nullptr, nullptr);
+                g_browserCheckboxes[i] = CreateWindowW(L"BUTTON", browsers[i].name.c_str(), WS_VISIBLE | WS_CHILD | BS_AUTOCHECKBOX, 60, 130 + (25 * i), 160, 22, hwnd, (HMENU)(intptr_t)(IDC_BROWSER_BASE + i), nullptr, nullptr);
                 SendMessageW(g_browserCheckboxes[i], WM_SETFONT, (WPARAM)g_hFont, TRUE);
                 SendMessageW(g_browserCheckboxes[i], BM_SETCHECK, BST_CHECKED, 0);
             }
 
-            HWND hBtnSelAll = CreateWindowW(L"BUTTON", L"Select All", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 230, 150, 90, 28, hwnd, (HMENU)IDC_SELECT_ALL, nullptr, nullptr);
-            HWND hBtnClrAll = CreateWindowW(L"BUTTON", L"Clear All", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 230, 190, 90, 28, hwnd, (HMENU)IDC_CLEAR_ALL, nullptr, nullptr);
+            HWND hBtnSelAll = CreateWindowW(L"BUTTON", L"Select All", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 230, 150, 90, 28, hwnd, (HMENU)(intptr_t)IDC_SELECT_ALL, nullptr, nullptr);
+            HWND hBtnClrAll = CreateWindowW(L"BUTTON", L"Clear All", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 230, 190, 90, 28, hwnd, (HMENU)(intptr_t)IDC_CLEAR_ALL, nullptr, nullptr);
             SendMessageW(hBtnSelAll, WM_SETFONT, (WPARAM)g_hFont, TRUE);
             SendMessageW(hBtnClrAll, WM_SETFONT, (WPARAM)g_hFont, TRUE);
 
-            HWND hActionBtn = CreateWindowW(L"BUTTON", L"EXECUTE", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 90, 310, 200, 45, hwnd, (HMENU)IDC_ACTION_BUTTON, nullptr, nullptr);
+            HWND hActionBtn = CreateWindowW(L"BUTTON", L"EXECUTE", WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON, 90, 310, 200, 45, hwnd, (HMENU)(intptr_t)IDC_ACTION_BUTTON, nullptr, nullptr);
             SendMessageW(hActionBtn, WM_SETFONT, (WPARAM)g_hFontBold, TRUE);
 
-            g_status = CreateWindowW(L"STATIC", L"Ready.", WS_VISIBLE | WS_CHILD | SS_CENTER, 10, 380, 360, 22, hwnd, (HMENU)IDC_STATUS_LABEL, nullptr, nullptr);
+            g_status = CreateWindowW(L"STATIC", L"Ready.", WS_VISIBLE | WS_CHILD | SS_CENTER, 10, 380, 360, 22, hwnd, (HMENU)(intptr_t)IDC_STATUS_LABEL, nullptr, nullptr);
             SendMessageW(g_status, WM_SETFONT, (WPARAM)g_hFont, TRUE);
             break;
         }
@@ -259,12 +260,11 @@ int WINAPI wWinMain(HINSTANCE hInstance, HINSTANCE, PWSTR, int nCmdShow) {
     wc.lpfnWndProc = WindowProc;
     wc.hInstance = hInstance;
     wc.lpszClassName = CLASS_NAME;
-    wc.hCursor = LoadCursorW(NULL, IDC_ARROW);
+    wc.hCursor = LoadCursorW(NULL, (LPCWSTR)IDC_ARROW); // GCC strict cast for IDC_ARROW
     wc.hbrBackground = CreateSolidBrush(RGB(18, 18, 18));
 
     RegisterClassW(&wc);
 
-    // Slim, perfectly proportioned window
     HWND hwnd = CreateWindowExW(0, CLASS_NAME, L"Pratibimb Setup", WS_OVERLAPPEDWINDOW & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX, 
                                 CW_USEDEFAULT, CW_USEDEFAULT, 400, 460, nullptr, nullptr, hInstance, nullptr);
     if (!hwnd) return 0;
