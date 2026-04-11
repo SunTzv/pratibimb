@@ -43,28 +43,28 @@ port.onMessage.addListener(function(msg) {
                     let cssVars = "";
                     if (isLight) {
                         cssVars = `
-                            --text-primary: hsl(${h}, ${s}%, 15%);
-                            --text-muted: hsl(${h}, ${Math.max(s-20, 0)}%, 35%);
-                            --text-faint: hsl(${h}, ${Math.max(s-30, 0)}%, 50%);
-                            --accent: hsl(${h}, ${Math.min(s+40, 100)}%, 35%);
-                            --accent-glow: hsla(${h}, ${Math.min(s+40, 100)}%, 35%, 0.18);
-                            --surface: hsla(${h}, ${s}%, 95%, 0.35);
-                            --surface-hover: hsla(${h}, ${s}%, 95%, 0.55);
-                            --border: hsla(${h}, ${s}%, 10%, 0.15);
-                            --border-focus: hsla(${h}, ${Math.min(s+40, 100)}%, 35%, 0.45);
+                            --text-primary: hsl(${h}, 10%, 10%);
+                            --text-muted: hsl(${h}, 10%, 35%);
+                            --text-faint: hsl(${h}, 10%, 50%);
+                            --accent: hsl(${h}, 90%, 35%);
+                            --accent-glow: hsla(${h}, 90%, 35%, 0.25);
+                            --surface: hsla(${h}, 10%, 95%, 0.65); /* 65% opacity for readability */
+                            --surface-hover: hsla(${h}, 10%, 100%, 0.85);
+                            --border: hsla(${h}, 20%, 0%, 0.15);
+                            --border-focus: hsla(${h}, 90%, 35%, 0.50);
                             background-color: rgb(${r}, ${g}, ${b});
                         `;
                     } else {
                         cssVars = `
-                            --text-primary: hsl(${h}, ${Math.max(s-10, 0)}%, 95%);
-                            --text-muted: hsl(${h}, ${Math.max(s-20, 0)}%, 75%);
-                            --text-faint: hsl(${h}, ${Math.max(s-20, 0)}%, 55%);
-                            --accent: hsl(${h}, ${Math.min(s+50, 100)}%, 70%);
-                            --accent-glow: hsla(${h}, ${Math.min(s+50, 100)}%, 70%, 0.18);
-                            --surface: hsla(${h}, ${Math.max(s-20, 0)}%, 5%, 0.35);
-                            --surface-hover: hsla(${h}, ${Math.max(s-20, 0)}%, 5%, 0.55);
-                            --border: hsla(${h}, ${s}%, 90%, 0.12);
-                            --border-focus: hsla(${h}, ${Math.min(s+50, 100)}%, 70%, 0.35);
+                            --text-primary: hsl(${h}, 10%, 98%);
+                            --text-muted: hsl(${h}, 10%, 75%);
+                            --text-faint: hsl(${h}, 10%, 60%);
+                            --accent: hsl(${h}, 90%, 75%);
+                            --accent-glow: hsla(${h}, 90%, 75%, 0.25);
+                            --surface: hsla(${h}, 15%, 5%, 0.65); /* 65% opacity for readability */
+                            --surface-hover: hsla(${h}, 15%, 10%, 0.85);
+                            --border: hsla(${h}, 20%, 100%, 0.15);
+                            --border-focus: hsla(${h}, 90%, 75%, 0.50);
                             background-color: rgb(${r}, ${g}, ${b});
                         `;
                     }
