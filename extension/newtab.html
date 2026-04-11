@@ -3,20 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <title>New Tab</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon-48.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            --text-primary: rgba(255, 255, 255, 0.93);
-            --text-muted:   rgba(255, 255, 255, 0.42);
-            --text-faint:   rgba(255, 255, 255, 0.20);
-            --accent:       #c8a96e;
-            --accent-glow:  rgba(200, 169, 110, 0.18);
-            --surface:      rgba(0, 0, 0, 0.28);
-            --surface-hover:rgba(0, 0, 0, 0.42);
-            --border:       rgba(255, 255, 255, 0.10);
+            /* Fallback colors for the very first 0.5 seconds of installation */
+            --text-primary: #ffffff;
+            --text-muted: rgba(255,255,255,0.6);
+            --text-faint: rgba(255,255,255,0.3);
+            --accent: #c8a96e;
+            --accent-glow: rgba(200, 169, 110, 0.18);
+            --surface: rgba(0,0,0,0.3);
+            --surface-hover: rgba(0,0,0,0.5);
+            --border: rgba(255,255,255,0.1);
             --border-focus: rgba(200, 169, 110, 0.35);
-            --blur:         blur(18px) saturate(160%);
+            --blur: blur(18px) saturate(160%);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -291,7 +293,6 @@
 
     <div class="nt-shell">
 
-        <!-- TOP: clock + weather -->
         <div class="nt-top">
             <div>
                 <div class="nt-time" id="nt-time">00<em>:</em>00</div>
@@ -302,7 +303,6 @@
             </div>
         </div>
 
-        <!-- MID: search -->
         <div class="nt-mid">
             <div class="nt-search-wrap" id="nt-swrap">
                 <svg class="nt-search-icon" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -314,7 +314,6 @@
             </div>
         </div>
 
-        <!-- BOTTOM: links + greeting -->
         <div class="nt-bottom">
             <nav class="nt-links">
                 <a class="nt-link brave" href="brave://settings">
