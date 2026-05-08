@@ -55,6 +55,11 @@ function tick() {
     // [PERF] Only repaint the DOM if the minute actually changed
     if (timeStr !== lastTimeStr) {
         document.getElementById('nt-time').innerHTML = timeStr;
+        
+        // [NEW] Update the idle clock if it exists
+        const idleClock = document.getElementById('nt-idle-clock');
+        if (idleClock) idleClock.innerHTML = timeStr;
+
         document.getElementById('nt-date').textContent = 
             `${DAYS[n.getDay()]} · ${MONTHS[n.getMonth()]} ${n.getDate()}, ${n.getFullYear()}`;
         
@@ -210,3 +215,88 @@ document.querySelectorAll('.nt-link').forEach(link => {
         }
     });
 });
+
+/* ── IDLE MODE (10s Inactivity) ── */
+const IDLE_TIMEOUT = 10000;
+let idleTimer;
+
+// 1. Generate the Idle Clock DOM element & CSS dynamically
+const swrap = document.getElementById('nt-swrap');
+if (swrap) {
+    swrap.style.position = 'relative'; // Required to absolute-position the clock inside it
+
+    // Create the idle clock element
+    const idleClock = document.createElement('div');
+    idleClock.id = 'nt-idle-clock';
+    // Sync the initial time
+    const d = new Date();
+    idleClock.innerHTML = `${String(d.getHours()).padStart(2,'0')}<em>:</em>${String(d.getMinutes()).padStart(2,'0')}`;
+    swrap.appendChild(idleClock);
+
+    // Inject CSS to handle fades automatically
+    const idleStyle = document.createElement('style');
+    idleStyle.textContent = `
+        /* Smooth transitions for elements fading in/out */
+        #nt-weather, #nt-time, #nt-date, #nt-greeting, .nt-link, 
+        #nt-search, #nt-search::placeholder, #nt-idle-clock {
+            transition: opacity 0.5s ease, color 0.5s ease;
+        }
+
+        /* Hide all UI elements except the search wrapper */
+        body.is-idle #nt-weather,
+        body.is-idle #nt-time,
+        body.is-idle #nt-date,
+        body.is-idle #nt-greeting,
+        body.is-idle .nt-link {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* Fade out the search bar's text and placeholder so the clock doesn't overlap it */
+        body.is-idle #nt-search {
+            color: transparent !important;
+        }
+        body.is-idle #nt-search::placeholder {
+            color: transparent !important;
+        }
+
+        /* The Idle Clock styling (Spawns perfectly centered over search bar) */
+        #nt-idle-clock {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 1.2rem;
+            font-weight: 500;
+            color: inherit; 
+            opacity: 0;
+            pointer-events: none; /* Allows clicks to pass through to the search bar */
+            z-index: 10;
+        }
+
+        /* Show the idle clock when body has the is-idle class */
+        body.is-idle #nt-idle-clock {
+            opacity: 1;
+        }
+    `;
+    document.head.appendChild(idleStyle);
+}
+
+// 2. Idle Timer Logic
+function resetIdle() {
+    document.body.classList.remove('is-idle');
+    clearTimeout(idleTimer);
+    
+    idleTimer = setTimeout(() => {
+        if (typeof closeSugs === 'function') closeSugs(); // Close the autocomplete dropdown if it's open
+        document.body.classList.add('is-idle');
+    }, IDLE_TIMEOUT);
+}
+
+// 3. Listen for any user activity to wake up the UI
+['mousemove', 'keydown', 'mousedown', 'wheel', 'touchstart'].forEach(evt => {
+    document.addEventListener(evt, resetIdle);
+});
+
+// Initialize the timer on load
+resetIdle();
