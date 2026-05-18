@@ -7,11 +7,11 @@
 ---
 
 <div align="center">
-  <img src="assets/roseate_glaze.png.png" width="49%" />
-  <img src="assets/sunburn_wen.png.png" width="49%" />
+  <img src="assets/roseate_glaze.png" width="49%" />
+  <img src="assets/sunburn_wen.png" width="49%" />
   <br><br>
-  <img src="assets/palace_of_winds.png.png" width="49%" />
-  <img src="assets/belude_in_selgrade.png.png" width="49%" />
+  <img src="assets/palace_of_winds.png" width="49%" />
+  <img src="assets/belude_in_selgrade.png" width="49%" />
   <br><br>
   <sub>looks different every time. that's the whole point.</sub>
 </div>
