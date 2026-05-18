@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
     <style>
         :root {
-            /* Fallback colors */
             --text-primary: rgba(255, 255, 255, 0.95);
             --text-muted: rgba(255, 255, 255, 0.70);
             --text-faint: rgba(255, 255, 255, 0.45);
@@ -48,22 +47,19 @@
             overflow: hidden;
         }
 
-        /* ── Revamped Layout shell ── */
         .nt-shell {
             position: fixed;
             inset: 0;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 5vh 6vw; /* Dynamic viewport padding for breathing room */
+            padding: 5vh 6vw;
         }
 
-        /* ════════════════════════
-           TOP BAR
-           ════════════════════════ */
+        /* ── TOP BAR ── */
         .nt-top {
             width: 100%;
-            max-width: 1400px; /* Wider spread */
+            max-width: 1400px;
             margin: 0 auto;
             display: flex;
             justify-content: space-between;
@@ -77,7 +73,7 @@
             font-family: 'Cormorant Garamond', serif;
             font-weight: 300;
             font-size: clamp(64px, 9vw, 108px);
-            line-height: 0.85; /* Tighter line height so it sits flush to the top */
+            line-height: 0.85;
             letter-spacing: -3px;
             color: var(--text-primary);
             text-shadow: 0 8px 32px var(--shadow-base), 0 2px 8px var(--text-shadow-color);
@@ -104,7 +100,16 @@
             text-shadow: 0 4px 16px var(--shadow-base), 0 1px 4px var(--text-shadow-color);
         }
         .nt-wx-row { display: flex; align-items: baseline; justify-content: flex-end; gap: 8px; }
-        .nt-wx-icon { font-size: 26px; line-height: 1; }
+
+        .nt-wx-icon {
+            width: 26px;
+            height: 26px;
+            background-color: var(--text-primary);
+            -webkit-mask-size: contain;
+            -webkit-mask-repeat: no-repeat;
+            -webkit-mask-position: center;
+        }
+
         .nt-wx-temp {
             font-family: 'Cormorant Garamond', serif;
             font-weight: 300;
@@ -128,15 +133,13 @@
             color: var(--text-faint);
         }
 
-        /* ════════════════════════
-           MIDDLE — search
-           ════════════════════════ */
+        /* ── MIDDLE ── */
         .nt-mid {
             width: 100%;
             max-width: 740px;
-            margin: 0 auto 12vh auto; /* Pushes the search bar slightly above absolute center */
+            margin: 0 auto 12vh auto;
             position: relative;
-            z-index: 100; /* FORCES search dropdown to sit on top of bottom buttons */
+            z-index: 100;
             animation: nt-rise 0.8s 0.08s cubic-bezier(0.16,1,0.3,1) both;
         }
 
@@ -150,9 +153,9 @@
             pointer-events: none;
             transition: all 0.3s ease;
         }
-        
-        .nt-search-wrap:focus-within .nt-search-icon { 
-            color: var(--accent-neon); 
+
+        .nt-search-wrap:focus-within .nt-search-icon {
+            color: var(--accent-neon);
             filter: drop-shadow(0 0 12px var(--accent-neon));
         }
 
@@ -177,15 +180,15 @@
         }
         .nt-search::placeholder { color: var(--text-faint); transition: opacity 0.3s; }
         .nt-search:focus::placeholder { opacity: 0; }
-        
+
         .nt-search:focus {
-            background: rgba(0, 0, 0, 0.45); 
+            background: rgba(0, 0, 0, 0.45);
             border-color: var(--accent-neon);
-            color: var(--accent-neon); 
-            text-shadow: 0 0 12px var(--accent-neon); 
-            box-shadow: 
-                0 0 0 1px var(--accent-neon), 
-                0 24px 64px rgba(0,0,0,0.6), 
+            color: var(--accent-neon);
+            text-shadow: 0 0 12px var(--accent-neon);
+            box-shadow:
+                0 0 0 1px var(--accent-neon),
+                0 24px 64px rgba(0,0,0,0.6),
                 inset 0 4px 24px rgba(0,0,0,0.5);
         }
 
@@ -202,32 +205,54 @@
         }
         .nt-search-wrap:focus-within .nt-engine-badge { color: var(--accent-neon); text-shadow: 0 0 8px var(--accent-neon); }
 
+        /* Idle clock inside search bar */
+        .nt-search-idle-clock {
+            position: absolute;
+            left: 50%; top: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Cormorant Garamond', serif;
+            font-weight: 300;
+            font-size: clamp(18px, 2.2vw, 26px);
+            letter-spacing: -0.5px;
+            color: var(--text-muted);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.8s ease;
+            white-space: nowrap;
+            text-shadow: 0 1px 6px var(--text-shadow-color);
+        }
+        .nt-search-idle-clock em {
+            font-style: normal;
+            color: var(--accent);
+            animation: blink 1s step-end infinite;
+            text-shadow: 0 0 16px var(--accent-glow);
+        }
+        body.is-idle .nt-search-idle-clock { opacity: 1; }
+
         /* Suggestions */
         .nt-sugs {
             position: absolute;
             top: calc(100% + 8px);
             left: 0; right: 0;
-            background: rgba(0, 0, 0, 0.65); 
+            background: rgba(0, 0, 0, 0.65);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--accent-neon);
             border-radius: 8px;
-            overflow-y: auto; /* QOL: Add scrolling if list gets too long */
-            max-height: 38vh; /* QOL: Prevents dropdown from hitting the bottom of the screen */
+            overflow-y: auto;
+            max-height: 38vh;
             z-index: 200;
             display: none;
             box-shadow: 0 16px 40px rgba(0,0,0,0.6);
             animation: fadeIn 0.2s ease-out forwards;
         }
-        /* QOL: Hide the ugly scrollbar for a clean look */
         .nt-sugs::-webkit-scrollbar { width: 0px; }
-        
         .nt-sugs.open { display: block; }
-        
+
         .nt-sug {
             padding: 12px 18px 12px 50px;
             font-size: 13.5px;
-            color: var(--accent-neon); 
+            color: var(--accent-neon);
             text-shadow: 0 0 8px var(--accent-neon);
             cursor: pointer;
             position: relative;
@@ -237,14 +262,12 @@
             overflow: hidden;
             text-overflow: ellipsis;
         }
-        
         .nt-sug:hover, .nt-sug.hl {
-            background: var(--accent-neon); 
+            background: var(--accent-neon);
             color: #000000;
             padding-left: 54px;
             text-shadow: none;
         }
-        
         .nt-sug-ic {
             position: absolute; left: 18px; top: 50%;
             transform: translateY(-50%);
@@ -253,13 +276,11 @@
             transition: all 0.15s ease;
         }
         .nt-sug:hover .nt-sug-ic, .nt-sug.hl .nt-sug-ic {
-            color: #000000; 
+            color: #000000;
             filter: none;
         }
 
-        /* ════════════════════════
-           BOTTOM BAR
-           ════════════════════════ */
+        /* ── BOTTOM BAR ── */
         .nt-bottom {
             width: 100%;
             max-width: 1400px;
@@ -268,7 +289,7 @@
             justify-content: space-between;
             align-items: center;
             position: relative;
-            z-index: 10; /* Safely tucked under the search bar layer */
+            z-index: 10;
             animation: nt-rise 0.8s 0.16s cubic-bezier(0.16,1,0.3,1) both;
         }
 
@@ -282,14 +303,14 @@
             background: var(--surface);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border); 
+            border: 1px solid var(--border);
             border-radius: 6px;
             font-family: 'DM Mono', monospace;
             font-size: 10.5px;
             font-weight: 400;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--text-primary); 
+            color: var(--text-primary);
             text-decoration: none;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -297,22 +318,19 @@
             box-shadow: 0 8px 24px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.25);
             text-shadow: 0 1px 4px var(--text-shadow-color);
         }
-        
         .nt-link:hover {
             background: var(--surface-hover);
             border-color: var(--accent);
             color: var(--accent);
-            transform: translateY(-3px); 
+            transform: translateY(-3px);
             box-shadow: 0 12px 32px var(--accent-glow), inset 0 1px 1px rgba(255,255,255,0.3);
             text-shadow: 0 0 12px var(--accent-glow);
         }
-
-        .nt-link svg { 
-            flex-shrink: 0; 
+        .nt-link svg {
+            flex-shrink: 0;
             transition: all 0.25s;
             filter: drop-shadow(0 2px 4px var(--text-shadow-color));
         }
-        
         .nt-link:hover svg {
             filter: drop-shadow(0 0 8px var(--accent-glow));
         }
@@ -327,11 +345,30 @@
             text-shadow: 0 2px 8px var(--shadow-base), 0 1px 4px var(--text-shadow-color);
         }
 
+        /* ── IDLE MODE ── */
+        #nt-weather, #nt-time, #nt-date, #nt-greeting, .nt-link,
+        .nt-search-wrap * {
+            transition: opacity 0.8s ease, color 0.8s ease, text-shadow 0.8s ease;
+        }
+
+        body.is-idle #nt-weather,
+        body.is-idle #nt-time,
+        body.is-idle #nt-date,
+        body.is-idle #nt-greeting,
+        body.is-idle .nt-link {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        body.is-idle .nt-search { color: transparent !important; text-shadow: none !important; }
+        body.is-idle .nt-search::placeholder { color: transparent !important; }
+        body.is-idle .nt-search-icon, body.is-idle .nt-engine-badge { opacity: 0; }
+
         @keyframes nt-rise {
             from { opacity: 0; transform: translateY(16px); }
             to   { opacity: 1; transform: translateY(0); }
         }
-        
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
@@ -361,13 +398,14 @@
                 </svg>
                 <input class="nt-search" id="nt-search" type="text" placeholder="search…" autocomplete="off" spellcheck="false"/>
                 <span class="nt-engine-badge">google</span>
+                <div class="nt-search-idle-clock" id="nt-idle-clock"></div>
                 <div class="nt-sugs" id="nt-sugs"></div>
             </div>
         </div>
 
         <div class="nt-bottom">
             <nav class="nt-links">
-               <a class="nt-link" href="chrome://settings">
+                <a class="nt-link" href="chrome://settings">
                     <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
