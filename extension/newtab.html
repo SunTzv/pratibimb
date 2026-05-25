@@ -82,16 +82,16 @@
             font-size: clamp(64px, 9vw, 108px);
             line-height: 0.85;
             letter-spacing: -3px;
-            color: var(--text-primary);
-            text-shadow: 0 8px 32px var(--shadow-base), 0 2px 8px var(--text-shadow-color);
+            color: var(--clock-text-primary);
+            text-shadow: 0 8px 32px var(--clock-shadow-base, var(--shadow-base)), 0 2px 8px var(--clock-text-shadow-color);
             display: inline-block;
             transform: scaleY(1.2);
         }
         .nt-time em {
             font-style: normal;
-            color: var(--accent);
+            color: var(--clock-accent);
             animation: blink 1s step-end infinite;
-            text-shadow: 0 0 24px var(--accent-glow);
+            text-shadow: 0 0 24px var(--clock-accent-glow);
         }
         .nt-time-ampm {
             font-size: 0.35em;
@@ -103,23 +103,24 @@
 
         .nt-date {
             margin-top: 12px;
-            font-size: 10.5px;
+            font-size: 12px;
+            font-weight: 500;
             letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: var(--text-muted);
-            text-shadow: 0 1px 4px var(--text-shadow-color);
+            color: var(--clock-text-primary);
+            text-shadow: 0 1px 4px var(--clock-text-shadow-color);
         }
 
         .nt-weather {
             text-align: left;
-            text-shadow: 0 4px 16px var(--shadow-base), 0 1px 4px var(--text-shadow-color);
+            text-shadow: 0 4px 16px var(--weather-shadow-base, var(--shadow-base)), 0 1px 4px var(--weather-text-shadow-color);
         }
         .nt-wx-row { display: flex; align-items: baseline; justify-content: flex-start; gap: 8px; }
 
         .nt-wx-icon {
             width: 26px;
             height: 26px;
-            background-color: var(--text-primary);
+            background-color: var(--weather-text-primary);
             -webkit-mask-size: contain;
             -webkit-mask-repeat: no-repeat;
             -webkit-mask-position: center;
@@ -131,16 +132,17 @@
             font-size: clamp(50px, 6.6vw, 82px);
             line-height: 0.85;
             letter-spacing: -1px;
-            color: var(--text-primary);
+            color: var(--weather-text-primary);
             display: inline-block;
             transform: scaleY(1.2);
         }
         .nt-wx-info-sub {
             margin-top: 12px;
-            font-size: 10.5px;
+            font-size: 12px;
+            font-weight: 500;
             letter-spacing: 0.16em;
             text-transform: uppercase;
-            color: var(--text-muted);
+            color: var(--weather-text-primary);
         }
 
         /* ── MIDDLE ── */
@@ -159,49 +161,47 @@
             position: absolute;
             left: 18px; top: 50%;
             transform: translateY(-50%);
-            color: var(--text-muted);
+            color: var(--search-text-muted);
             pointer-events: none;
             transition: all 0.3s ease;
         }
 
         .nt-search-wrap:focus-within .nt-search-icon {
-            color: var(--accent-neon);
-            filter: drop-shadow(0 0 12px var(--accent-neon));
+            color: var(--search-accent-neon);
+            filter: drop-shadow(0 0 12px var(--search-accent-neon));
         }
 
         .nt-search {
             width: 100%;
             padding: 17px 58px 17px 50px;
-            background: var(--surface);
+            background: var(--search-surface);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
+            border: 1px solid var(--search-border);
             border-radius: 8px;
             font-family: 'Satoshi', sans-serif;
             font-size: 14.5px;
             font-weight: 300;
             letter-spacing: 0.025em;
-            color: var(--text-primary);
-            caret-color: var(--accent-neon);
+            color: var(--search-text-primary);
+            caret-color: var(--search-accent-neon);
             outline: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 12px 40px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.25);
-            text-shadow: 0 1px 4px var(--text-shadow-color);
+            box-shadow: 0 12px 40px var(--search-shadow-base), inset 0 1px 1px rgba(255,255,255,0.25);
+            text-shadow: 0 1px 4px var(--search-text-shadow-color);
             user-select: text;
             -webkit-user-select: text;
         }
-        .nt-search::placeholder { color: var(--text-faint); transition: opacity 0.3s; }
+        .nt-search::placeholder { color: var(--search-text-faint); transition: opacity 0.3s; }
         .nt-search:focus::placeholder { opacity: 0; }
 
         .nt-search:focus {
-            background: rgba(0, 0, 0, 0.45);
-            border-color: var(--accent-neon);
-            color: var(--accent-neon);
-            text-shadow: 0 0 12px var(--accent-neon);
+            background: var(--search-surface-hover);
+            border-color: var(--search-border-focus);
             box-shadow:
-                0 0 0 1px var(--accent-neon),
-                0 24px 64px rgba(0,0,0,0.6),
-                inset 0 4px 24px rgba(0,0,0,0.5);
+                0 0 0 1px var(--search-border-focus),
+                0 24px 64px var(--search-shadow-base),
+                inset 0 4px 24px rgba(0,0,0,0.4);
         }
 
         .nt-engine-badge {
@@ -211,11 +211,11 @@
             font-size: 9.5px;
             letter-spacing: 0.14em;
             text-transform: uppercase;
-            color: var(--text-faint);
+            color: var(--search-text-faint);
             pointer-events: none;
             transition: color 0.3s ease;
         }
-        .nt-search-wrap:focus-within .nt-engine-badge { color: var(--accent-neon); text-shadow: 0 0 8px var(--accent-neon); }
+        .nt-search-wrap:focus-within .nt-engine-badge { color: var(--search-accent-neon); text-shadow: 0 0 8px var(--search-accent-neon); }
 
         /* Idle clock inside search bar */
         .nt-search-idle-clock {
@@ -226,18 +226,18 @@
             font-weight: 300;
             font-size: clamp(18px, 2.2vw, 26px);
             letter-spacing: -0.5px;
-            color: var(--text-muted);
+            color: var(--search-text-muted);
             pointer-events: none;
             opacity: 0;
             transition: opacity 0.8s ease;
             white-space: nowrap;
-            text-shadow: 0 1px 6px var(--text-shadow-color);
+            text-shadow: 0 1px 6px var(--search-text-shadow-color);
         }
         .nt-search-idle-clock em {
             font-style: normal;
-            color: var(--accent);
+            color: var(--search-accent);
             animation: blink 1s step-end infinite;
-            text-shadow: 0 0 16px var(--accent-glow);
+            text-shadow: 0 0 16px var(--search-accent-glow);
         }
         body.is-idle .nt-search-idle-clock { opacity: 1; }
 
@@ -246,16 +246,16 @@
             position: absolute;
             top: calc(100% + 8px);
             left: 0; right: 0;
-            background: rgba(0, 0, 0, 0.65);
+            background: var(--search-surface);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--accent-neon);
+            border: 1px solid var(--search-border-focus);
             border-radius: 8px;
             overflow-y: auto;
             max-height: 38vh;
             z-index: 200;
             display: none;
-            box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 16px 40px var(--search-shadow-base);
             animation: fadeIn 0.2s ease-out forwards;
         }
         .nt-sugs::-webkit-scrollbar { width: 0px; }
@@ -264,8 +264,8 @@
         .nt-sug {
             padding: 12px 18px 12px 50px;
             font-size: 13.5px;
-            color: var(--accent-neon);
-            text-shadow: 0 0 8px var(--accent-neon);
+            color: var(--search-text-primary);
+            text-shadow: 0 1px 4px var(--search-text-shadow-color);
             cursor: pointer;
             position: relative;
             transition: all 0.15s ease;
@@ -275,20 +275,19 @@
             text-overflow: ellipsis;
         }
         .nt-sug:hover, .nt-sug.hl {
-            background: var(--accent-neon);
-            color: #000000;
+            background: var(--search-hover-highlight);
+            color: var(--search-text-on-hover);
             padding-left: 54px;
             text-shadow: none;
         }
         .nt-sug-ic {
             position: absolute; left: 18px; top: 50%;
             transform: translateY(-50%);
-            color: var(--accent-neon);
-            filter: drop-shadow(0 0 6px var(--accent-neon));
+            color: var(--search-text-muted);
             transition: all 0.15s ease;
         }
         .nt-sug:hover .nt-sug-ic, .nt-sug.hl .nt-sug-ic {
-            color: #000000;
+            color: var(--search-text-on-hover);
             filter: none;
         }
 
@@ -312,47 +311,47 @@
             align-items: center;
             gap: 7px;
             padding: 9px 16px;
-            background: var(--surface);
+            background: var(--links-surface);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
-            border: 1px solid var(--border);
+            border: 1px solid var(--links-border);
             border-radius: 6px;
             font-family: 'Satoshi', sans-serif;
             font-size: 10.5px;
             font-weight: 400;
             letter-spacing: 0.1em;
             text-transform: uppercase;
-            color: var(--text-primary);
+            color: var(--links-text-primary);
             text-decoration: none;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
-            box-shadow: 0 8px 24px var(--shadow-base), inset 0 1px 1px rgba(255,255,255,0.25);
-            text-shadow: 0 1px 4px var(--text-shadow-color);
+            box-shadow: 0 8px 24px var(--links-shadow-base, var(--shadow-base)), inset 0 1px 1px rgba(255,255,255,0.25);
+            text-shadow: 0 1px 4px var(--links-text-shadow-color);
         }
         .nt-link:hover {
-            background: var(--surface-hover);
-            border-color: var(--accent);
-            color: var(--accent);
+            background: var(--links-surface-hover);
+            border-color: var(--links-hover-highlight);
+            color: var(--links-hover-highlight);
             transform: translateY(-3px);
-            box-shadow: 0 12px 32px var(--accent-glow), inset 0 1px 1px rgba(255,255,255,0.3);
-            text-shadow: 0 0 12px var(--accent-glow);
+            box-shadow: 0 12px 32px var(--links-hover-highlight-glow), inset 0 1px 1px rgba(255,255,255,0.3);
+            text-shadow: 0 0 12px var(--links-hover-highlight-glow);
         }
         .nt-link svg {
             flex-shrink: 0;
             transition: all 0.25s;
-            filter: drop-shadow(0 2px 4px var(--text-shadow-color));
+            filter: drop-shadow(0 2px 4px var(--links-text-shadow-color));
         }
         .nt-link:hover svg {
-            filter: drop-shadow(0 0 8px var(--accent-glow));
+            filter: drop-shadow(0 0 8px var(--links-hover-highlight-glow));
         }
 
         .nt-greeting {
             font-family: 'Tangerine', cursive;
-            font-weight: 400;
-            font-size: 28px;
-            color: var(--text-faint);
-            text-shadow: 0 2px 8px var(--shadow-base), 0 1px 4px var(--text-shadow-color);
+            font-weight: 700;
+            font-size: 30px;
+            color: var(--greeting-text-faint);
+            text-shadow: 0 2px 8px var(--greeting-shadow-base, var(--shadow-base)), 0 1px 4px var(--greeting-text-shadow-color);
         }
 
         /* ── IDLE MODE ── */
@@ -378,7 +377,7 @@
             content: "";
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.28);
+            background: var(--idle-overlay-end, rgba(0, 0, 0, 0.18));
             pointer-events: none;
             z-index: 90;
             opacity: 0;
@@ -390,8 +389,8 @@
         }
 
         @keyframes shadow-breath {
-            0%, 100% { background-color: rgba(0, 0, 0, 0.18); }
-            50%      { background-color: rgba(0, 0, 0, 0.28); }
+            0%, 100% { background-color: var(--idle-overlay-start, rgba(0, 0, 0, 0.08)); }
+            50%      { background-color: var(--idle-overlay-end, rgba(0, 0, 0, 0.18)); }
         }
 
         @keyframes nt-rise {
