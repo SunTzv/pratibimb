@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customize</title>
+    <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon_48.png">
+    <style>
+        @font-face {
+            font-family: 'Satoshi';
+            src: url("fonts/Satoshi.ttf") format("truetype");
+            font-weight: normal;
+            font-style: normal;
+        }
+        :root {
+            --text-primary: rgba(255, 255, 255, 0.95);
+            --text-muted: rgba(255, 255, 255, 0.70);
+            --border: rgba(255, 255, 255, 0.20);
+            --surface: rgba(0, 0, 0, 0.35);
+            --surface-hover: rgba(0, 0, 0, 0.55);
+            --shadow-base: rgba(0, 0, 0, 0.70);
+            --blur: blur(28px) saturate(140%);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html {
+            background-color: #000000;
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        body {
+            font-family: 'Satoshi', sans-serif;
+            color: var(--text-primary);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .nt-container {
+            width: 100%;
+            max-width: 580px;
+            padding: 40px;
+            background: var(--surface);
+            backdrop-filter: var(--blur);
+            -webkit-backdrop-filter: var(--blur);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            box-shadow: 0 24px 64px var(--shadow-base);
+            position: relative;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .nt-header {
+            margin-bottom: 30px;
+        }
+
+        .nt-back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            text-decoration: none;
+            font-size: 11px;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: color 0.2s ease, transform 0.2s ease;
+            margin-bottom: 20px;
+            background: none;
+            border: none;
+            outline: none;
+        }
+        .nt-back-btn:hover {
+            color: var(--text-primary);
+            transform: translateX(-2px);
+        }
+
+        .nt-title {
+            font-size: 26px;
+            font-weight: 500;
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            text-shadow: 0 1px 4px var(--text-shadow-color, rgba(0, 0, 0, 0.60));
+        }
+
+        .nt-desc {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 400;
+            letter-spacing: 0.025em;
+            line-height: 1.6;
+        }
+
+        .nt-divider {
+            height: 1px;
+            background: var(--border);
+            margin: 24px 0;
+            border: none;
+        }
+
+        .nt-section {
+            margin-bottom: 28px;
+        }
+
+        .nt-section-title {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: -0.1px;
+            margin-bottom: 6px;
+        }
+
+        .nt-section-desc {
+            font-size: 11.5px;
+            color: var(--text-muted);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        /* ── Toggle Switch ── */
+        .nt-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--surface-hover);
+            border: 1px solid var(--border);
+            padding: 14px 20px;
+            border-radius: 8px;
+        }
+
+        .nt-toggle-label {
+            font-size: 13px;
+            font-weight: 400;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            inset: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--text-primary);
+            transition: .3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        input:checked + .slider {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(20px);
+            background-color: var(--text-on-accent, #000);
+        }
+
+        /* ── Typography selects ── */
+        .nt-select-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+        }
+
+        .nt-select-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .nt-select-lbl {
+            font-size: 11px;
+            color: var(--text-muted);
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .nt-select {
+            -webkit-appearance: none;
+            appearance: none;
+            background-color: rgba(255, 255, 255, 0.03);
+            background-image: url('data:image/svg+xml;utf8,<svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M1 1L5 5L9 1" stroke="rgba(255,255,255,0.6)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>');
+            background-repeat: no-repeat;
+            background-position: right 16px center;
+            background-size: 10px 6px;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            padding: 12px 38px 12px 16px;
+            border-radius: 8px;
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            width: 100%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+
+        .nt-select:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-focus, rgba(255, 255, 255, 0.3));
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.25);
+            transform: translateY(-1px);
+        }
+
+        .nt-select:focus {
+            background-color: rgba(255, 255, 255, 0.08);
+            border-color: var(--accent, rgba(255, 255, 255, 0.5));
+            box-shadow: 0 0 0 3px var(--accent-glow, rgba(255, 255, 255, 0.15)), 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .nt-select option {
+            background-color: #121212;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 13px;
+            font-family: 'Satoshi', sans-serif;
+            padding: 12px;
+        }
+
+        /* ── Actions ── */
+        .nt-actions {
+            margin-top: 36px;
+            display: flex;
+            justify-content: flex-end;
+        }
+
+        .nt-default-btn {
+            background: none;
+            border: 1px solid var(--border);
+            color: var(--text-primary);
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nt-default-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--accent);
+            color: var(--accent);
+            box-shadow: 0 8px 24px var(--accent-glow);
+            text-shadow: 0 0 8px var(--accent-glow);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+    <script src="fastload.js"></script>
+</head>
+<body>
+    <div class="nt-container">
+        <div class="nt-header">
+            <button class="nt-back-btn" id="back-btn">
+                <svg width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="19" y1="12" x2="5" y2="12"></line>
+                    <polyline points="12 19 5 12 12 5"></polyline>
+                </svg>
+                Back
+            </button>
+            <h1 class="nt-title">Customize</h1>
+            <p class="nt-desc">Tailor your workspace experience. Configure dynamic clock behaviors and premium typography settings.</p>
+        </div>
+
+        <div class="nt-section">
+            <h2 class="nt-section-title">Clock Format</h2>
+            <p class="nt-section-desc">Choose between 12-hour AM/PM and 24-hour time representation on the dashboard.</p>
+            <div class="nt-toggle-row">
+                <span class="nt-toggle-label">Use 24-Hour Time Format</span>
+                <label class="switch">
+                    <input type="checkbox" id="clock-toggle">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+
+        <hr class="nt-divider">
+
+        <div class="nt-section">
+            <h2 class="nt-section-title">Typography</h2>
+            <p class="nt-section-desc">Select premium Google Fonts for headings (Clock & Weather Temp), normal layout text, and greetings.</p>
+            
+            <div class="nt-select-grid">
+                <div class="nt-select-wrapper">
+                    <label class="nt-select-lbl" for="sel-heading">Headings</label>
+                    <select class="nt-select" id="sel-heading">
+                        <option value="Jaro">Jaro (Default)</option>
+                        <option value="Outfit">Outfit</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Syne">Syne</option>
+                        <option value="Cormorant Garamond">Cormorant Garamond</option>
+                        <option value="Cinzel">Cinzel</option>
+                        <option value="Bebas Neue">Bebas Neue</option>
+                        <option value="Space Grotesk">Space Grotesk</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Syncopate">Syncopate</option>
+                    </select>
+                </div>
+
+                <div class="nt-select-wrapper">
+                    <label class="nt-select-lbl" for="sel-normal">Body Text</label>
+                    <select class="nt-select" id="sel-normal">
+                        <option value="Satoshi">Satoshi (Default)</option>
+                        <option value="Inter">Inter</option>
+                        <option value="Plus Jakarta Sans">Plus Jakarta Sans</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="DM Sans">DM Sans</option>
+                        <option value="Outfit">Outfit</option>
+                        <option value="Work Sans">Work Sans</option>
+                        <option value="Sora">Sora</option>
+                        <option value="Cabin">Cabin</option>
+                    </select>
+                </div>
+
+                <div class="nt-select-wrapper">
+                    <label class="nt-select-lbl" for="sel-greeting">Greetings</label>
+                    <select class="nt-select" id="sel-greeting">
+                        <option value="Tangerine">Tangerine (Default)</option>
+                        <option value="Great Vibes">Great Vibes</option>
+                        <option value="Alex Brush">Alex Brush</option>
+                        <option value="Parisienne">Parisienne</option>
+                        <option value="Italianno">Italianno</option>
+                        <option value="Sacramento">Sacramento</option>
+                        <option value="Dancing Script">Dancing Script</option>
+                        <option value="Pacifico">Pacifico</option>
+                        <option value="Caveat">Caveat</option>
+                        <option value="Satisfy">Satisfy</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+
+        <div class="nt-actions">
+            <button class="nt-default-btn" id="default-btn">Switch to Default</button>
+        </div>
+    </div>
+
+    <script src="customize.js"></script>
+</body>
+</html>

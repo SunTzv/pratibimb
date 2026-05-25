@@ -13,6 +13,18 @@ let lastTimeStr    = "";
 let currentPeriod  = "";
 let use24Hour      = localStorage.getItem('clock24') !== 'false';
 
+// Async master database sync for clock format
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+    chrome.storage.local.get(['clock24'], (res) => {
+        if (res.clock24 !== undefined) {
+            use24Hour = res.clock24 !== false && res.clock24 !== 'false';
+            localStorage.setItem('clock24', use24Hour);
+            lastTimeStr = "";
+            tick();
+        }
+    });
+}
+
 function getPeriod(hr) {
     if (hr < 5)  return 'lateNight';
     if (hr < 12) return 'morning';
@@ -71,9 +83,34 @@ setInterval(tick, 1000);
 document.getElementById('nt-time').addEventListener('click', () => {
     use24Hour = !use24Hour;
     localStorage.setItem('clock24', use24Hour);
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ clock24: use24Hour });
+    }
     lastTimeStr = "";
     tick();
 });
+
+// Live synchronization between settings changes (fonts/clock) across pages
+if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            if (changes.clock24) {
+                use24Hour = changes.clock24.newValue !== false && changes.clock24.newValue !== 'false';
+                localStorage.setItem('clock24', use24Hour);
+                lastTimeStr = "";
+                tick();
+            }
+            if (changes.font_heading || changes.font_normal || changes.font_greeting) {
+                const h = (changes.font_heading ? changes.font_heading.newValue : null) || localStorage.getItem('font_heading') || 'Jaro';
+                const n = (changes.font_normal ? changes.font_normal.newValue : null) || localStorage.getItem('font_normal') || 'Satoshi';
+                const g = (changes.font_greeting ? changes.font_greeting.newValue : null) || localStorage.getItem('font_greeting') || 'Tangerine';
+                if (typeof window.applyFonts === 'function') {
+                    window.applyFonts(h, n, g);
+                }
+            }
+        }
+    });
+}
 
 const WX = {
     0: 'Clear', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
@@ -245,7 +282,10 @@ document.addEventListener('keydown', e => {
 document.querySelectorAll('.nt-link').forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
-        const url = link.getAttribute('href');
+        let url = link.getAttribute('href');
+        if (!url.includes('://')) {
+            url = chrome.runtime.getURL(url);
+        }
         if (chrome && chrome.tabs) chrome.tabs.update({ url });
     });
 });

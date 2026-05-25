@@ -130,6 +130,9 @@ function extractAndApplyPalette(imageUrl, isNewWallpaper = false) {
     
     if (isNewWallpaper) {
         localStorage.setItem('instantWallpaper', imageUrl);
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ instantWallpaper: imageUrl });
+        }
     }
     document.documentElement.style.backgroundImage = `url('${imageUrl}')`;
 
@@ -192,6 +195,9 @@ function extractAndApplyPalette(imageUrl, isNewWallpaper = false) {
         `;
 
         localStorage.setItem('dynamicPalette', cssVars);
+        if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+            chrome.storage.local.set({ dynamicPalette: cssVars });
+        }
         document.documentElement.style.cssText += cssVars;
         
         // Lighter breathing shadow overlays (tinted dynamically with overall background dominant hue)
