@@ -1,5 +1,5 @@
 const GREETINGS = {
-    lateNight: ["burning the midnight oil.", "the quiet hours.", "still awake?", "the world sleeps."],
+    lateNight: ["dead and alive!", "the quiet hours.", "still awake?", "the world sleeps."],
     morning:   ["good morning.", "rise and shine.", "a fresh start.", "let us begin."],
     afternoon: ["good afternoon.", "steady pace.", "keep the momentum.", "halfway there."],
     evening:   ["good evening.", "winding down.", "twilight hours.", "almost done."],
@@ -74,7 +74,6 @@ document.getElementById('nt-time').addEventListener('click', () => {
     lastTimeStr = "";
     tick();
 });
-
 
 const WX = {
     0: 'Clear', 1: 'Mainly clear', 2: 'Partly cloudy', 3: 'Overcast',
