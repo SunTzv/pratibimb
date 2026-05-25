@@ -29,7 +29,7 @@ function formatTime(n) {
     } else {
         let h = n.getHours();
         const m = String(n.getMinutes()).padStart(2, '0');
-        const ampm = h >= 12 ? 'pm' : 'am';
+        const ampm = h >= 12 ? 'PM' : 'AM';
         h = h % 12 || 12;
         return { display: `${h}<em>:</em>${m}`, suffix: ampm };
     }
@@ -94,8 +94,7 @@ function paintWeather(temp, code, city) {
             <div class="nt-wx-icon" style="-webkit-mask-image: url('${iconUrl}');"></div>
             <span class="nt-wx-temp">${Math.round(temp)}°</span>
         </div>
-        <div class="nt-wx-desc">${desc}</div>
-        <div class="nt-wx-city">${city}</div>`;
+        <div class="nt-wx-info-sub">${desc} · ${city}</div>`;
 
     document.getElementById('nt-weather').innerHTML = html;
     localStorage.setItem('wx_cache', html);
@@ -113,7 +112,7 @@ function initWeather() {
     const cache     = localStorage.getItem('wx_cache');
     const cacheTime = localStorage.getItem('wx_time');
 
-    if (cache && cacheTime && (Date.now() - cacheTime < 10 * 60 * 1000)) {
+    if (cache && cacheTime && (Date.now() - cacheTime < 10 * 60 * 1000) && cache.includes('nt-wx-info-sub')) {
         document.getElementById('nt-weather').innerHTML = cache;
         return;
     }
@@ -233,6 +232,13 @@ document.addEventListener('click', e => {
 
 inp.focus();
 document.addEventListener('keydown', e => {
+    // Ctrl + I instantly activates Idle Mode on command
+    if (e.ctrlKey && e.key.toLowerCase() === 'i') {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+        enterIdleMode();
+        return;
+    }
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement !== inp) inp.focus();
 });
 
@@ -248,6 +254,14 @@ document.querySelectorAll('.nt-link').forEach(link => {
 
 const IDLE_TIMEOUT = 10000;
 let idleTimer;
+let mouseMoveStartTime = 0;
+let mouseMoveDebounce = null;
+
+function enterIdleMode() {
+    if (typeof closeSugs === 'function') closeSugs();
+    document.body.classList.add('is-idle');
+    clearTimeout(idleTimer);
+}
 
 function resetIdle() {
     document.body.classList.remove('is-idle');
@@ -258,8 +272,43 @@ function resetIdle() {
     }, IDLE_TIMEOUT);
 }
 
+function onUserActivity(e) {
+    const isIdle = document.body.classList.contains('is-idle');
+
+    if (isIdle) {
+        if (e.type === 'keydown') {
+            const isAlphanumeric = /^[a-zA-Z0-9]$/.test(e.key);
+            if (!isAlphanumeric) {
+                return; // Ignore system/modifier keys when in idle mode
+            }
+        } else if (e.type === 'mousemove') {
+            if (!mouseMoveStartTime) {
+                mouseMoveStartTime = Date.now();
+            }
+            
+            clearTimeout(mouseMoveDebounce);
+            mouseMoveDebounce = setTimeout(() => {
+                mouseMoveStartTime = 0; // Reset tracking if mouse movement stops
+            }, 150);
+
+            if (Date.now() - mouseMoveStartTime < 300) {
+                return; // Ignore quick nudges (must move for >= 300ms)
+            }
+            
+            mouseMoveStartTime = 0;
+        }
+    } else {
+        mouseMoveStartTime = 0;
+    }
+
+    resetIdle();
+}
+
 ['mousemove', 'keydown', 'mousedown', 'wheel', 'touchstart'].forEach(evt => {
-    document.addEventListener(evt, resetIdle);
+    document.addEventListener(evt, onUserActivity);
 });
 
 resetIdle();
+
+// Disable right-click context menu
+document.addEventListener('contextmenu', e => e.preventDefault());
