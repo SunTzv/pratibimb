@@ -300,41 +300,36 @@
         .nt-link {
             display: flex;
             align-items: center;
-            gap: 7px;
-            padding: 9px 16px;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
             background: var(--links-surface);
             backdrop-filter: var(--blur);
             -webkit-backdrop-filter: var(--blur);
             border: 1px solid var(--links-border);
-            border-radius: 6px;
-            font-family: 'Satoshi', sans-serif;
-            font-size: 10.5px;
-            font-weight: 400;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
+            border-radius: 10px;
             color: var(--links-text-primary);
             text-decoration: none;
             cursor: pointer;
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             user-select: none;
             box-shadow: 0 8px 24px var(--links-shadow-base, var(--shadow-base)), inset 0 1px 1px rgba(255,255,255,0.25);
-            text-shadow: 0 1px 4px var(--links-text-shadow-color);
         }
-        .nt-link:hover {
+        .nt-link:hover, .nt-link:focus-visible {
             background: var(--links-surface-hover);
             border-color: var(--links-hover-highlight);
             color: var(--links-hover-highlight);
-            transform: translateY(-3px);
+            transform: translateY(-2px);
             box-shadow: 0 12px 32px var(--links-hover-highlight-glow), inset 0 1px 1px rgba(255,255,255,0.3);
-            text-shadow: 0 0 12px var(--links-hover-highlight-glow);
+            outline: none;
         }
         .nt-link svg {
             flex-shrink: 0;
             transition: all 0.25s;
-            filter: drop-shadow(0 2px 4px var(--links-text-shadow-color));
+            filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
         }
-        .nt-link:hover svg {
-            filter: drop-shadow(0 0 8px var(--links-hover-highlight-glow));
+        .nt-link:hover svg, .nt-link:focus-visible svg {
+            filter: drop-shadow(0 0 6px var(--links-hover-highlight-glow));
         }
 
         .nt-greeting {
@@ -424,39 +419,34 @@
 
         <div class="nt-bottom">
             <nav class="nt-links">
-                <a class="nt-link" href="customize.html">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
+                <a class="nt-link" data-href="customize.html" title="Customize Workspace" tabindex="0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24">
                         <path d="M12 22C17.52 22 22 17.52 22 12C22 6.48 17.52 2 12 2C6.48 2 2 6.48 2 12C2 14.72 3.09 17.19 4.86 19C5.35 19.5 5.25 20.5 4.5 21"></path>
                         <circle cx="7.5" cy="10.5" r="1"></circle>
                         <circle cx="11.5" cy="7.5" r="1"></circle>
                         <circle cx="16.5" cy="9.5" r="1"></circle>
                     </svg>
-                    Customize
                 </a>
-                <a class="nt-link" href="chrome://settings">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <a class="nt-link" data-href="chrome://settings" title="Chrome Settings" tabindex="0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <circle cx="12" cy="12" r="3"></circle>
                         <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
                     </svg>
-                    Settings
                 </a>
-                <a class="nt-link" href="chrome://extensions">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <a class="nt-link" data-href="chrome://extensions" title="Extensions" tabindex="0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5z"/><line x1="16" y1="8" x2="2" y2="22"/><line x1="17.5" y1="15" x2="9" y2="15"/>
                     </svg>
-                    Extensions
                 </a>
-                <a class="nt-link" href="chrome://history">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <a class="nt-link" data-href="chrome://history" title="History" tabindex="0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <polyline points="12 8 12 12 14 14"/><path d="M3.05 11a9 9 0 1 1 .5 4M3 16V11H8"/>
                     </svg>
-                    History
                 </a>
-                <a class="nt-link" href="chrome://downloads">
-                    <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7" viewBox="0 0 24 24">
+                <a class="nt-link" data-href="chrome://downloads" title="Downloads" tabindex="0">
+                    <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
                         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/>
                     </svg>
-                    Downloads
                 </a>
             </nav>
             <div class="nt-greeting" id="nt-greeting"></div>

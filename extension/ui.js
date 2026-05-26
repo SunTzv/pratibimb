@@ -354,11 +354,18 @@ document.addEventListener('keydown', e => {
 document.querySelectorAll('.nt-link').forEach(link => {
     link.addEventListener('click', e => {
         e.preventDefault();
-        let url = link.getAttribute('href');
+        let url = link.getAttribute('data-href');
+        if (!url) return;
         if (!url.includes('://')) {
             url = chrome.runtime.getURL(url);
         }
         if (chrome && chrome.tabs) chrome.tabs.update({ url });
+    });
+    link.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            link.click();
+        }
     });
 });
 
