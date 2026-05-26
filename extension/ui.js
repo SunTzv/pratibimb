@@ -12,10 +12,12 @@ const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov
 let lastTimeStr    = "";
 let currentPeriod  = "";
 let use24Hour      = localStorage.getItem('clock24') !== 'false';
+let idleAuto       = localStorage.getItem('idle_auto') !== 'false';
+let idleTimeout    = parseInt(localStorage.getItem('idle_timeout') || '10') * 1000;
 
-// Async master database sync for clock format and search engine
+// Async master database sync for clock format, search engine, auto-idle, and timeout
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'search_engine'], (res) => {
+    chrome.storage.local.get(['clock24', 'search_engine', 'idle_auto', 'idle_timeout'], (res) => {
         if (res.clock24 !== undefined) {
             use24Hour = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', use24Hour);
@@ -35,6 +37,16 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             if (searchInput) {
                 searchInput.placeholder = `Search with ${ENGINE_NAMES[res.search_engine] || 'Google'}…`;
             }
+        }
+        if (res.idle_auto !== undefined) {
+            idleAuto = res.idle_auto !== false && res.idle_auto !== 'false';
+            localStorage.setItem('idle_auto', idleAuto);
+            if (typeof resetIdle === 'function') resetIdle();
+        }
+        if (res.idle_timeout !== undefined) {
+            idleTimeout = parseInt(res.idle_timeout || '10') * 1000;
+            localStorage.setItem('idle_timeout', res.idle_timeout);
+            if (typeof resetIdle === 'function') resetIdle();
         }
     });
 }
@@ -136,6 +148,16 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
                 if (searchInput) {
                     searchInput.placeholder = `Search with ${ENGINE_NAMES[newEngine] || 'Google'}…`;
                 }
+            }
+            if (changes.idle_auto) {
+                idleAuto = changes.idle_auto.newValue !== false && changes.idle_auto.newValue !== 'false';
+                localStorage.setItem('idle_auto', idleAuto);
+                if (typeof resetIdle === 'function') resetIdle();
+            }
+            if (changes.idle_timeout) {
+                idleTimeout = parseInt(changes.idle_timeout.newValue || '10') * 1000;
+                localStorage.setItem('idle_timeout', changes.idle_timeout.newValue);
+                if (typeof resetIdle === 'function') resetIdle();
             }
         }
     });
@@ -338,13 +360,58 @@ document.addEventListener('click', e => {
     if (!document.getElementById('nt-swrap').contains(e.target)) closeSugs();
 });
 
-inp.focus();
+function matchesShortcut(e, shortcutStr) {
+    const parts = shortcutStr.split('+').map(p => p.trim().toLowerCase());
+    
+    let needsCtrl = false;
+    let needsShift = false;
+    let needsAlt = false;
+    let mainKey = '';
+    
+    parts.forEach(part => {
+        if (part === 'ctrl' || part === 'control') needsCtrl = true;
+        else if (part === 'shift') needsShift = true;
+        else if (part === 'alt') needsAlt = true;
+        else mainKey = part;
+    });
+    
+    const hasCtrl = e.ctrlKey || e.metaKey;
+    const hasShift = e.shiftKey;
+    const hasAlt = e.altKey;
+    
+    if (needsCtrl !== hasCtrl) return false;
+    if (needsShift !== hasShift) return false;
+    if (needsAlt !== hasAlt) return false;
+    
+    if (!mainKey) return false;
+    
+    let pressedKey = e.key.toLowerCase();
+    if (pressedKey === ' ') pressedKey = 'space';
+    
+    return pressedKey === mainKey;
+}
+
 document.addEventListener('keydown', e => {
-    // Ctrl + I instantly activates Idle Mode on command
-    if (e.ctrlKey && e.key.toLowerCase() === 'i') {
+    const activeEl = document.activeElement;
+    const isInput = activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA' || activeEl.isContentEditable);
+    
+    const shortcutStr = localStorage.getItem('idle_shortcut') || 'Ctrl + I';
+    const parts = shortcutStr.split('+').map(p => p.trim().toLowerCase());
+    const hasModifiers = parts.some(p => p === 'ctrl' || p === 'control' || p === 'alt' || p === 'shift');
+    
+    if (isInput && !hasModifiers) {
+        return;
+    }
+
+    if (matchesShortcut(e, shortcutStr)) {
         e.preventDefault();
         e.stopImmediatePropagation();
-        enterIdleMode();
+        
+        if (document.body.classList.contains('is-idle')) {
+            resetIdle();
+        } else {
+            enterIdleMode();
+        }
         return;
     }
     if (e.key.length === 1 && !e.ctrlKey && !e.metaKey && !e.altKey && document.activeElement !== inp) inp.focus();
@@ -370,7 +437,6 @@ document.querySelectorAll('.nt-link').forEach(link => {
 });
 
 
-const IDLE_TIMEOUT = 10000;
 let idleTimer;
 let mouseMoveStartTime = 0;
 let mouseMoveDebounce = null;
@@ -384,10 +450,11 @@ function enterIdleMode() {
 function resetIdle() {
     document.body.classList.remove('is-idle');
     clearTimeout(idleTimer);
+    if (!idleAuto) return;
     idleTimer = setTimeout(() => {
         if (typeof closeSugs === 'function') closeSugs();
         document.body.classList.add('is-idle');
-    }, IDLE_TIMEOUT);
+    }, idleTimeout);
 }
 
 let lastActivityTime = 0;
