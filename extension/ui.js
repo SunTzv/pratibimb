@@ -13,14 +13,28 @@ let lastTimeStr    = "";
 let currentPeriod  = "";
 let use24Hour      = localStorage.getItem('clock24') !== 'false';
 
-// Async master database sync for clock format
+// Async master database sync for clock format and search engine
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24'], (res) => {
+    chrome.storage.local.get(['clock24', 'search_engine'], (res) => {
         if (res.clock24 !== undefined) {
             use24Hour = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', use24Hour);
             lastTimeStr = "";
             tick();
+        }
+        if (res.search_engine !== undefined) {
+            localStorage.setItem('search_engine', res.search_engine);
+            const searchInput = document.getElementById('nt-search');
+            const ENGINE_NAMES = {
+                google: 'Google',
+                duckduckgo: 'DuckDuckGo',
+                bing: 'Bing',
+                brave: 'Brave',
+                yahoo: 'Yahoo'
+            };
+            if (searchInput) {
+                searchInput.placeholder = `Search with ${ENGINE_NAMES[res.search_engine] || 'Google'}…`;
+            }
         }
     });
 }
@@ -90,7 +104,7 @@ document.getElementById('nt-time').addEventListener('click', () => {
     tick();
 });
 
-// Live synchronization between settings changes (fonts/clock) across pages
+// Live synchronization between settings changes (fonts/clock/engine) across pages
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged) {
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local') {
@@ -106,6 +120,21 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
                 const g = (changes.font_greeting ? changes.font_greeting.newValue : null) || localStorage.getItem('font_greeting') || 'Tangerine';
                 if (typeof window.applyFonts === 'function') {
                     window.applyFonts(h, n, g);
+                }
+            }
+            if (changes.search_engine) {
+                const newEngine = changes.search_engine.newValue || 'google';
+                localStorage.setItem('search_engine', newEngine);
+                const searchInput = document.getElementById('nt-search');
+                const ENGINE_NAMES = {
+                    google: 'Google',
+                    duckduckgo: 'DuckDuckGo',
+                    bing: 'Bing',
+                    brave: 'Brave',
+                    yahoo: 'Yahoo'
+                };
+                if (searchInput) {
+                    searchInput.placeholder = `Search with ${ENGINE_NAMES[newEngine] || 'Google'}…`;
                 }
             }
         }
@@ -186,14 +215,57 @@ function tryMath(expr) {
 }
 
 const inp = document.getElementById('nt-search');
+if (inp) {
+    const ENGINE_NAMES = {
+        google: 'Google',
+        duckduckgo: 'DuckDuckGo',
+        bing: 'Bing',
+        brave: 'Brave',
+        yahoo: 'Yahoo'
+    };
+    const engine = localStorage.getItem('search_engine') || 'google';
+    inp.placeholder = `Search with ${ENGINE_NAMES[engine] || 'Google'}…`;
+}
 const box = document.getElementById('nt-sugs');
 let items = [], cur = -1, debounceTimer;
 
 function go(q) {
     if (!q) return;
-    window.location.href = /^(https?:\/\/|www\.)/.test(q)
-        ? (q.startsWith('http') ? q : 'https://' + q)
-        : `https://www.google.com/search?q=${encodeURIComponent(q)}`;
+    const trimmed = q.trim();
+    
+    // 1. Check if it's already a fully qualified URL or special chrome protocol
+    if (/^(https?|chrome|chrome-extension|file|ftp):\/\//i.test(trimmed)) {
+        window.location.href = trimmed;
+        return;
+    }
+    
+    // 2. Powerful domain/host/IP detector with zero-space requirement
+    const URL_REGEX = /^(https?:\/\/)?((([a-zA-Z0-9-]+\.)+[a-zA-Z]{2,63})|(localhost)|(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}))(:\d+)?(\/[^\s]*)?$/i;
+    
+    if (URL_REGEX.test(trimmed)) {
+        const hasProtocol = /^(https?:\/\/)/i.test(trimmed);
+        if (!hasProtocol) {
+            // Local hosts and IPs get HTTP, normal domains get HTTPS
+            const isLocal = /^(localhost|\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})/i.test(trimmed);
+            window.location.href = (isLocal ? 'http://' : 'https://') + trimmed;
+        } else {
+            window.location.href = trimmed;
+        }
+        return;
+    }
+    
+    // 3. Fallback to active Search Engine query
+    const engine = localStorage.getItem('search_engine') || 'google';
+    const engineUrls = {
+        google: 'https://www.google.com/search?q=',
+        duckduckgo: 'https://duckduckgo.com/?q=',
+        bing: 'https://www.bing.com/search?q=',
+        brave: 'https://search.brave.com/search?q=',
+        yahoo: 'https://search.yahoo.com/search?p='
+    };
+    
+    const dest = (engineUrls[engine] || engineUrls.google) + encodeURIComponent(trimmed);
+    window.location.href = dest;
 }
 
 function closeSugs() { box.classList.remove('open'); box.innerHTML = ''; items = []; cur = -1; }
@@ -311,7 +383,17 @@ function resetIdle() {
     }, IDLE_TIMEOUT);
 }
 
+let lastActivityTime = 0;
+
 function onUserActivity(e) {
+    const now = Date.now();
+    
+    // Throttle high-frequency mousemove events (e.g., 1000Hz mice) to run at most once every 50ms
+    if (e.type === 'mousemove' && now - lastActivityTime < 50) {
+        return;
+    }
+    lastActivityTime = now;
+
     const isIdle = document.body.classList.contains('is-idle');
 
     if (isIdle) {
@@ -322,7 +404,7 @@ function onUserActivity(e) {
             }
         } else if (e.type === 'mousemove') {
             if (!mouseMoveStartTime) {
-                mouseMoveStartTime = Date.now();
+                mouseMoveStartTime = now;
             }
             
             clearTimeout(mouseMoveDebounce);
@@ -330,8 +412,8 @@ function onUserActivity(e) {
                 mouseMoveStartTime = 0; // Reset tracking if mouse movement stops
             }, 150);
 
-            if (Date.now() - mouseMoveStartTime < 300) {
-                return; // Ignore quick nudges (must move for >= 300ms)
+            if (now - mouseMoveStartTime < 100) {
+                return; // Ignore quick nudges (must move for >= 100ms)
             }
             
             mouseMoveStartTime = 0;

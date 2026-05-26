@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <title>New Tab</title>
     <link rel="icon" type="image/png" sizes="48x48" href="icons/favicon_48.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Jaro&family=Tangerine&display=swap');
         @font-face {
@@ -203,19 +207,6 @@
                 0 24px 64px var(--search-shadow-base),
                 inset 0 4px 24px rgba(0,0,0,0.4);
         }
-
-        .nt-engine-badge {
-            position: absolute;
-            right: 17px; top: 50%;
-            transform: translateY(-50%);
-            font-size: 9.5px;
-            letter-spacing: 0.14em;
-            text-transform: uppercase;
-            color: var(--search-text-faint);
-            pointer-events: none;
-            transition: color 0.3s ease;
-        }
-        .nt-search-wrap:focus-within .nt-engine-badge { color: var(--search-accent-neon); text-shadow: 0 0 8px var(--search-accent-neon); }
 
         /* Idle clock inside search bar */
         .nt-search-idle-clock {
@@ -426,7 +417,6 @@
                     <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="22" y2="22"/>
                 </svg>
                 <input class="nt-search" id="nt-search" type="text" placeholder="search…" autocomplete="off" spellcheck="false"/>
-                <span class="nt-engine-badge">google</span>
                 <div class="nt-search-idle-clock" id="nt-idle-clock"></div>
                 <div class="nt-sugs" id="nt-sugs"></div>
             </div>

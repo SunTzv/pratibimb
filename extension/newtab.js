@@ -25,8 +25,9 @@ function extractRegionHsl(data, startX, endX, startY, endY) {
     let warmR = 0, warmG = 0, warmB = 0, warmCount = 0;
     let coolR = 0, coolG = 0, coolB = 0, coolCount = 0;
 
-    for (let y = startY; y < endY; y++) {
-        for (let x = startX; x < endX; x++) {
+    const step = 2;
+    for (let y = startY; y < endY; y += step) {
+        for (let x = startX; x < endX; x += step) {
             let i = (y * 100 + x) * 4;
             if (i >= data.length) continue;
             let r = data[i], g = data[i+1], b = data[i+2];
@@ -207,11 +208,7 @@ function extractAndApplyPalette(imageUrl, isNewWallpaper = false) {
     img.src = imageUrl;
 }
 
-// 1. Immediately extract and apply theme from the cached wallpaper on page load
-const cachedWallpaper = localStorage.getItem('instantWallpaper');
-if (cachedWallpaper) {
-    extractAndApplyPalette(cachedWallpaper, false);
-}
+// Native messaging port connects asynchronously to check for desktop wallpaper updates in the background
 
 // 2. Connect native messaging port to check for wallpaper updates
 port.onMessage.addListener(function(msg) {
