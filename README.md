@@ -7,11 +7,15 @@
 ---
 
 <div align="center">
-  <img src="assets/roseate_glaze.png" width="49%" />
-  <img src="assets/sunburn_wen.png" width="49%" />
+  <img src="assets/hydrated_sap.png" width="49%" />
+  <img src="assets/night_light.png" width="49%" />
+  <br>
+  <sub>active</sub>
   <br><br>
-  <img src="assets/palace_of_winds.png" width="49%" />
-  <img src="assets/belude_in_selgrade.png" width="49%" />
+  <img src="assets/old_town_of_bern.png" width="49%" />
+  <img src="assets/sakura_canopy.png" width="49%" />
+  <br>
+  <sub>idle</sub>
   <br><br>
   <sub>looks different every time. that's the whole point.</sub>
 </div>
@@ -64,9 +68,9 @@ Run the installer → Uninstall → **UNINSTALL EVERYTHING**. Removes the host, 
 
 ## Go deeper
 
-[`DOCUMENTATION.md`](DOCUMENTATION.md) — architecture, Native Messaging protocol, the works  
 [`DEV-LOG.md`](DEV_LOG.md) — the build journal, mistakes and all
+(nothing for you mostly for me to track versions)
 
 ---
 
-<sub>Favicon by Dupe (dupe_dupe on Discord) · Weather icons by <a href="https://basmilius.github.io/meteocons/fill.html">Bas Milius</a></sub>
+<sub>Favicon by Dupe (dupe_dupe on Discord) · Weather icons by <a href="https://basmilius.github.io/meteocons/fill.html">Bas Milius</a> · Fonts via <a href="https://github.com/TeaTimBuYT">TeaTimBuYT</a></sub>

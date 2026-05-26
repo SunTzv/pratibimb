@@ -14,9 +14,14 @@ const normalSel = document.getElementById('sel-normal');
 const greetingSel = document.getElementById('sel-greeting');
 const engineSel = document.getElementById('sel-engine');
 
+const idleAutoToggle = document.getElementById('idle-auto-toggle');
+const idleTimeoutSel = document.getElementById('sel-idle-timeout');
+const idleTimeoutBlock = document.getElementById('idle-timeout-block');
+const recorderBtn = document.getElementById('btn-shortcut-recorder');
+
 // Custom Premium Select Building Logic
 function initCustomSelects() {
-    const selects = [headingSel, normalSel, greetingSel, engineSel];
+    const selects = [headingSel, normalSel, greetingSel, engineSel, idleTimeoutSel];
     
     selects.forEach(select => {
         if (!select) return;
@@ -91,7 +96,7 @@ function initCustomSelects() {
 }
 
 function updateCustomDropdowns() {
-    const selects = [headingSel, normalSel, greetingSel, engineSel];
+    const selects = [headingSel, normalSel, greetingSel, engineSel, idleTimeoutSel];
     selects.forEach(select => {
         if (!select) return;
         const wrapper = document.querySelector(`.nt-select-custom-wrapper[data-select-id="${select.id}"]`);
@@ -122,6 +127,26 @@ headingSel.value = localStorage.getItem('font_heading') || 'Jaro';
 normalSel.value = localStorage.getItem('font_normal') || 'Satoshi';
 greetingSel.value = localStorage.getItem('font_greeting') || 'Tangerine';
 engineSel.value = localStorage.getItem('search_engine') || 'google';
+
+idleAutoToggle.checked = localStorage.getItem('idle_auto') !== 'false';
+idleTimeoutSel.value = localStorage.getItem('idle_timeout') || '10';
+if (recorderBtn) {
+    recorderBtn.textContent = localStorage.getItem('idle_shortcut') || 'Ctrl + I';
+}
+
+function updateIdleUI() {
+    if (!idleAutoToggle || !idleTimeoutBlock) return;
+    const autoOn = idleAutoToggle.checked;
+    if (autoOn) {
+        idleTimeoutBlock.style.opacity = '1';
+        idleTimeoutBlock.style.pointerEvents = 'all';
+    } else {
+        idleTimeoutBlock.style.opacity = '0.3';
+        idleTimeoutBlock.style.pointerEvents = 'none';
+    }
+}
+
+updateIdleUI();
 
 function applyStylesLocal() {
     const families = [];
@@ -165,7 +190,7 @@ applyStylesLocal();
 
 // 3. Initialize from chrome.storage.local (asynchronous master database sync)
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine'], (res) => {
+    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut'], (res) => {
         if (res.clock24 !== undefined) {
             toggle.checked = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', toggle.checked);
@@ -186,7 +211,20 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             engineSel.value = res.search_engine;
             localStorage.setItem('search_engine', res.search_engine);
         }
+        if (res.idle_auto !== undefined) {
+            idleAutoToggle.checked = res.idle_auto !== false && res.idle_auto !== 'false';
+            localStorage.setItem('idle_auto', idleAutoToggle.checked);
+        }
+        if (res.idle_timeout) {
+            idleTimeoutSel.value = res.idle_timeout;
+            localStorage.setItem('idle_timeout', res.idle_timeout);
+        }
+        if (res.idle_shortcut) {
+            localStorage.setItem('idle_shortcut', res.idle_shortcut);
+            if (recorderBtn) recorderBtn.textContent = res.idle_shortcut;
+        }
         applyStylesLocal();
+        updateIdleUI();
     });
 }
 
@@ -197,6 +235,9 @@ function saveSettings() {
     localStorage.setItem('font_normal', normalSel.value);
     localStorage.setItem('font_greeting', greetingSel.value);
     localStorage.setItem('search_engine', engineSel.value);
+    
+    localStorage.setItem('idle_auto', idleAutoToggle.checked);
+    localStorage.setItem('idle_timeout', idleTimeoutSel.value);
 
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         chrome.storage.local.set({
@@ -204,7 +245,9 @@ function saveSettings() {
             font_heading: headingSel.value,
             font_normal: normalSel.value,
             font_greeting: greetingSel.value,
-            search_engine: engineSel.value
+            search_engine: engineSel.value,
+            idle_auto: idleAutoToggle.checked,
+            idle_timeout: idleTimeoutSel.value
         });
     }
     applyStylesLocal();
@@ -216,6 +259,87 @@ normalSel.addEventListener('change', saveSettings);
 greetingSel.addEventListener('change', saveSettings);
 engineSel.addEventListener('change', saveSettings);
 
+idleAutoToggle.addEventListener('change', () => {
+    saveSettings();
+    updateIdleUI();
+});
+idleTimeoutSel.addEventListener('change', saveSettings);
+
+// Interactive Shortcut Keybind Recorder
+let isRecordingShortcut = false;
+
+function startRecordingShortcut() {
+    if (isRecordingShortcut) return;
+    isRecordingShortcut = true;
+    recorderBtn.classList.add('recording');
+    recorderBtn.textContent = 'Press keys…';
+    document.addEventListener('keydown', handleKeybindRecord, true);
+}
+
+function stopRecordingShortcut() {
+    isRecordingShortcut = false;
+    recorderBtn.classList.remove('recording');
+    document.removeEventListener('keydown', handleKeybindRecord, true);
+    
+    const saved = localStorage.getItem('idle_shortcut') || 'Ctrl + I';
+    recorderBtn.textContent = saved;
+}
+
+function handleKeybindRecord(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    const key = e.key;
+    
+    if (key === 'Escape' && !e.ctrlKey && !e.altKey && !e.shiftKey) {
+        stopRecordingShortcut();
+        return;
+    }
+    
+    if (['Control', 'Shift', 'Alt', 'Meta'].includes(key)) {
+        return;
+    }
+    
+    const parts = [];
+    if (e.ctrlKey || e.metaKey) parts.push('Ctrl');
+    if (e.altKey) parts.push('Alt');
+    if (e.shiftKey) parts.push('Shift');
+    
+    let mainKey = key;
+    if (mainKey === ' ') {
+        mainKey = 'Space';
+    } else if (mainKey.length === 1) {
+        mainKey = mainKey.toUpperCase();
+    } else {
+        mainKey = mainKey.charAt(0).toUpperCase() + mainKey.slice(1);
+    }
+    
+    parts.push(mainKey);
+    
+    const shortcutStr = parts.join(' + ');
+    
+    localStorage.setItem('idle_shortcut', shortcutStr);
+    if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ idle_shortcut: shortcutStr });
+    }
+    
+    isRecordingShortcut = false;
+    recorderBtn.classList.remove('recording');
+    recorderBtn.textContent = shortcutStr;
+    document.removeEventListener('keydown', handleKeybindRecord, true);
+}
+
+if (recorderBtn) {
+    recorderBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        if (isRecordingShortcut) {
+            stopRecordingShortcut();
+        } else {
+            startRecordingShortcut();
+        }
+    });
+}
+
 // 5. Switch to Default Reset
 document.getElementById('default-btn').addEventListener('click', () => {
     toggle.checked = true;
@@ -223,7 +347,14 @@ document.getElementById('default-btn').addEventListener('click', () => {
     normalSel.value = 'Satoshi';
     greetingSel.value = 'Tangerine';
     engineSel.value = 'google';
+    
+    idleAutoToggle.checked = true;
+    idleTimeoutSel.value = '10';
+    localStorage.setItem('idle_shortcut', 'Ctrl + I');
+    if (recorderBtn) recorderBtn.textContent = 'Ctrl + I';
+
     saveSettings();
+    updateIdleUI();
 });
 
 // 6. Live storage changes listener (in case user modifies settings directly from homepage)
@@ -249,6 +380,19 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
             if (changes.search_engine) {
                 engineSel.value = changes.search_engine.newValue;
                 localStorage.setItem('search_engine', engineSel.value);
+            }
+            if (changes.idle_auto) {
+                idleAutoToggle.checked = changes.idle_auto.newValue !== false && changes.idle_auto.newValue !== 'false';
+                localStorage.setItem('idle_auto', idleAutoToggle.checked);
+                updateIdleUI();
+            }
+            if (changes.idle_timeout) {
+                idleTimeoutSel.value = changes.idle_timeout.newValue;
+                localStorage.setItem('idle_timeout', idleTimeoutSel.value);
+            }
+            if (changes.idle_shortcut) {
+                localStorage.setItem('idle_shortcut', changes.idle_shortcut.newValue);
+                if (recorderBtn) recorderBtn.textContent = changes.idle_shortcut.newValue;
             }
             applyStylesLocal();
         }

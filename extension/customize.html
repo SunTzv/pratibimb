@@ -462,6 +462,68 @@
             text-shadow: 0 0 8px var(--accent-glow);
         }
 
+        /* Keybind row styling */
+        .nt-keybind-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 14px 20px;
+            border-radius: 8px;
+            width: 100%;
+        }
+        .nt-keybind-text {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .nt-keybind-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        .nt-keybind-sublabel {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        
+        /* Keybind Recorder Button */
+        .nt-keybind-recorder {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-primary);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-family: inherit;
+            font-size: 12.5px;
+            font-weight: 500;
+            letter-spacing: 0.03em;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+            min-width: 100px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        .nt-keybind-recorder:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--accent, rgba(255, 255, 255, 0.3));
+            box-shadow: 0 6px 20px var(--accent-glow, rgba(255, 255, 255, 0.15));
+            transform: translateY(-1px);
+        }
+        .nt-keybind-recorder.recording {
+            background: var(--accent, rgba(255, 255, 255, 0.2));
+            color: var(--text-on-accent, #000);
+            border-color: var(--accent);
+            animation: pulse-border 1.5s infinite;
+            font-weight: 600;
+        }
+        
+        @keyframes pulse-border {
+            0%, 100% { box-shadow: 0 0 0 0px var(--accent-glow); }
+            50% { box-shadow: 0 0 0 6px var(--accent-glow); }
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -578,6 +640,51 @@
                             <option value="Caveat">Caveat</option>
                             <option value="Satisfy">Satisfy</option>
                         </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Idle Mode & Shortcuts -->
+            <div class="nt-card">
+                <h2 class="nt-card-title">Idle Mode & Shortcuts</h2>
+                <p class="nt-card-desc">Configure dashboard focus, automatic ambient dimming, and custom keyboard trigger binds.</p>
+                
+                <div class="nt-settings-block">
+                    <div class="nt-toggle-row">
+                        <div class="nt-toggle-text">
+                            <span class="nt-toggle-label">Auto Idle Mode</span>
+                            <span class="nt-toggle-sublabel">Fade out UI to ambient wallpaper after inactivity.</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="idle-auto-toggle">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="nt-settings-block" id="idle-timeout-block" style="transition: all 0.3s ease;">
+                    <div class="nt-select-wrapper">
+                        <label class="nt-select-lbl" for="sel-idle-timeout">Idle Inactivity Delay</label>
+                        <select class="nt-select" id="sel-idle-timeout">
+                            <option value="5">5 Seconds</option>
+                            <option value="10">10 Seconds (Default)</option>
+                            <option value="30">30 Seconds</option>
+                            <option value="60">1 Minute</option>
+                            <option value="120">2 Minutes</option>
+                            <option value="300">5 Minutes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="nt-settings-block">
+                    <div class="nt-keybind-row">
+                        <div class="nt-keybind-text">
+                            <span class="nt-keybind-label">Idle Mode Toggle Shortcut</span>
+                            <span class="nt-keybind-sublabel">Press key combination to instantly trigger idle mode.</span>
+                        </div>
+                        <button class="nt-keybind-recorder" id="btn-shortcut-recorder" title="Click to record a new key combination">
+                            Ctrl + I
+                        </button>
                     </div>
                 </div>
             </div>
