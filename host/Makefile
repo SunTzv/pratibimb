@@ -1,5 +1,5 @@
 CXX = g++
-CXXFLAGS = -O3 -Wall -std=c++14
+CXXFLAGS = -O3 -Wall -Wno-ignored-attributes -std=c++14
 TARGET = pratibimb_host
 
 all: $(TARGET)
