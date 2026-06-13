@@ -3,6 +3,9 @@
 # Pratibimb Linux Uninstaller
 set -e
 
+# Ensure we are in the script's directory so relative paths work
+cd "$(dirname "$0")"
+
 echo "========================================="
 echo "       Pratibimb Linux Uninstaller"
 echo "========================================="
