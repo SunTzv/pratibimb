@@ -10,6 +10,12 @@ echo "Packaging Pratibimb for Linux..."
 # Navigate to project root
 cd ..
 
+echo "Updating extension.zip..."
+rm -f extension.zip
+cd extension
+zip -r ../extension.zip . > /dev/null
+cd ..
+
 # Define staging directory name
 STAGING_DIR="Pratibimb-Linux"
 
