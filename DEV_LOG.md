@@ -35,6 +35,16 @@ Didn't plan to open this repo today. Opened it anyway.
 
 ---
 
+### v1.4.3+ *(June 13, 2026)*
+
+Decided it's time to show some love to the penguin.
+
+- **Linux Support Added**
+- **Linux CLI Installer**
+- Improved installtion with a hardcoded key haven't added this to the windows version yet
+
+---
+
 ## Takeaway
 
 Systems programming is basically:

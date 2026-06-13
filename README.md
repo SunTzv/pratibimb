@@ -2,7 +2,7 @@
 
 > *Your browser finally has the same energy as your desktop.*
 
-***Pratibimb*** (Hindi for *reflection*) is a Chromium extension that syncs your Windows desktop wallpaper to your New Tab page — live, automatically, every time. The whole UI adapts to whatever wallpaper you're rocking. Moody dark wallpaper? Moody vibes. Bright summer meadow? You get the idea.
+***Pratibimb*** (Hindi for *reflection*) is a Chromium extension that syncs your Windows or Linux desktop wallpaper to your New Tab page — live, automatically, every time. The whole UI adapts to whatever wallpaper you're rocking. Moody dark wallpaper? Moody vibes. Bright summer meadow? You get the idea.
 
 ---
 
@@ -41,15 +41,17 @@ Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here
 
 | Setup | Verdict |
 |---|---|
+| Linux (just tested Cinnamon so far) | ✅ CLI setup |
 | Tiny10 / Win10 — Chrome, Brave, Edge | ✅ Perfect |
 | Windows 11 — Edge | ✅ Perfect |
-| Windows 11 — Brave | ❌ Brave says no and means it |
-| Windows 11 — Chrome / Opera / Vivaldi | ❓ Should work, just untested |
+| Windows 11 — Brave | I FOUND A FIX I'LL UPDATE SOON PROMISE |
+| Windows 11 — Chrome | ✅ Perfect |
 
 ---
 
 ## Installation
 
+### Windows
 [![Download](https://img.shields.io/badge/Download-Pratibimb__Setup.exe-0078D4?style=for-the-badge&logo=windows)](https://github.com/SunTzv/Pratibimb/releases/latest/download/Pratibimb_Setup.exe)
 
 **Step 1** — Run `Pratibimb_Setup.exe`, pick your browser, click **Extract & Open Folder**.
@@ -58,11 +60,27 @@ Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here
 
 Open a new tab. That's it. 🎉
 
+### Linux
+[![Download](https://img.shields.io/badge/Download-Pratibimb__Linux.tar.gz-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/SunTzv/Pratibimb/releases/latest/download/Pratibimb-Linux.tar.gz)
+[![Download](https://img.shields.io/badge/Download-extension.zip-8A2BE2?style=for-the-badge)](https://github.com/SunTzv/Pratibimb/releases/latest/download/extension.zip)
+
+**Step 1** — Extract the `.tar.gz` archive and navigate into it via your terminal.
+
+**Step 2** — Go to your browser's extensions page, turn on **Developer mode**, and drag the `extension` folder or extracted `extension.zip` into it.
+
+**Step 3** — Run `./linux_install/install.sh` and hit `Y`. It auto-compiles the C++ host and statically links it to Chrome, Chromium, Brave, and Edge automatically!
+
+Open a new tab. That's it. 🎉
+
+*(Already ran the script but need an update? Just replace your old `extension` folder with the new one. The host config is fully persistent!)*
+
 ---
 
 ## Uninstalling
 
-Run the installer → Uninstall → **UNINSTALL EVERYTHING**. Removes the host, the registry keys, the AppData folder — all of it. Then remove the extension from your browser. Gone without a trace.
+**Windows:** Run the installer → Uninstall → **UNINSTALL EVERYTHING**. Removes the host, the registry keys, the AppData folder — all of it. Then remove the extension from your browser. Gone without a trace.
+
+**Linux:** Run `./linux_install/uninstall.sh`. Wipes the generated JSON configs from your browsers and purges the binary from `~/.local/share/Pratibimb`. Remove the extension from your browser. Gone without a trace.
 
 ---
 
