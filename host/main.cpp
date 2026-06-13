@@ -3,8 +3,14 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
+#else
+#include <memory>
+#include <stdexcept>
+#include <array>
+#endif
 #include <cstdint>
 
 #define STB_IMAGE_IMPLEMENTATION
@@ -16,7 +22,13 @@ using namespace std;
 
 // --- AGGRESSIVE LOGGER ---
 void logDebug(const string& msg) {
-    string logPath = string(getenv("TEMP")) + "\\pratibimb_log.txt";
+#ifdef _WIN32
+    const char* tempEnv = getenv("TEMP");
+    string tempDir = tempEnv ? tempEnv : "C:\\Temp";
+    string logPath = tempDir + "\\pratibimb_log.txt";
+#else
+    string logPath = "/tmp/pratibimb_log.txt";
+#endif
     ofstream logFile(logPath, ios::app);
     logFile << msg << "\n";
     logFile.close();
@@ -29,6 +41,69 @@ void sendMessage(const string& jsonResponse) {
     cout.flush();
     logDebug("[SUCCESS] Sent chunk to browser. Length: " + to_string(len));
 }
+
+#ifndef _WIN32
+string exec(const char* cmd) {
+    std::array<char, 128> buffer;
+    string result;
+    std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
+    if (!pipe) {
+        throw std::runtime_error("popen() failed!");
+    }
+    while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
+        result += buffer.data();
+    }
+    if (!result.empty() && result.back() == '\n') result.pop_back();
+    if (result.rfind("file://", 0) == 0) result = result.substr(7);
+    if (!result.empty() && result.front() == '\'' && result.back() == '\'') {
+        result = result.substr(1, result.length() - 2);
+        if (result.rfind("file://", 0) == 0) result = result.substr(7);
+    }
+    return result;
+}
+
+string getLinuxWallpaperPath() {
+    const char* desktop = getenv("XDG_CURRENT_DESKTOP");
+    string desktopStr = desktop ? desktop : "";
+    
+    if (desktopStr.find("GNOME") != string::npos || desktopStr.find("Unity") != string::npos || desktopStr.find("Pantheon") != string::npos || desktopStr.find("Budgie") != string::npos) {
+        string path = exec("gsettings get org.gnome.desktop.background picture-uri-dark 2>/dev/null | tr -d \"'\"");
+        if (path.empty() || path == "") {
+            path = exec("gsettings get org.gnome.desktop.background picture-uri 2>/dev/null | tr -d \"'\"");
+        }
+        if (path.rfind("file://", 0) == 0) path = path.substr(7);
+        return path;
+    } else if (desktopStr.find("KDE") != string::npos) {
+        string path = exec("kreadconfig5 --file plasma-org.kde.plasma.desktop-appletsrc --group Containments --group 1 --group Wallpaper --group org.kde.image --group General --key Image 2>/dev/null");
+        if (path.empty()) {
+            path = exec("grep '^Image=' ~/.config/plasma-org.kde.plasma.desktop-appletsrc 2>/dev/null | tail -n 1 | cut -d '=' -f 2 | tr -d '\\n'");
+        }
+        if (path.rfind("file://", 0) == 0) path = path.substr(7);
+        return path;
+    } else if (desktopStr.find("XFCE") != string::npos) {
+        return exec("xfconf-query -c xfce4-desktop -p /backdrop/screen0/monitor0/workspace0/last-image 2>/dev/null");
+    } else if (desktopStr.find("MATE") != string::npos) {
+        return exec("gsettings get org.mate.background picture-filename 2>/dev/null | tr -d \"'\"");
+    } else if (desktopStr.find("Cinnamon") != string::npos || desktopStr.find("X-Cinnamon") != string::npos) {
+        string path = exec("gsettings get org.cinnamon.desktop.background picture-uri 2>/dev/null | tr -d \"'\"");
+        if (path.rfind("file://", 0) == 0) path = path.substr(7);
+        return path;
+    } else if (desktopStr.find("LXDE") != string::npos) {
+        return exec("grep '^wallpaper=' ~/.config/pcmanfm/LXDE/desktop.conf 2>/dev/null | cut -d '=' -f 2");
+    } else if (desktopStr.find("LXQt") != string::npos) {
+        return exec("grep '^icon=' ~/.config/pcmanfm-qt/lxqt/settings.conf 2>/dev/null | cut -d '=' -f 2");
+    } else if (desktopStr.find("Deepin") != string::npos) {
+        string path = exec("dconf read /com/deepin/wrap/gnome/desktop/background/picture-uri 2>/dev/null | tr -d \"'\"");
+        if (path.rfind("file://", 0) == 0) path = path.substr(7);
+        return path;
+    }
+    
+    string fehPath = exec("grep '^feh --bg' ~/.fehbg 2>/dev/null | awk '{print $NF}' | tr -d \"'\"");
+    if (!fehPath.empty()) return fehPath;
+
+    return "";
+}
+#endif
 
 static const string base64_chars = 
              "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -71,8 +146,10 @@ int main() {
     logDebug("=====================================");
     logDebug("[STEP 1] Host Executable Launched by Browser!");
 
+#ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);
     _setmode(_fileno(stdout), _O_BINARY);
+#endif
 
     uint32_t length = 0;
     
@@ -91,8 +168,14 @@ int main() {
         cin.read(msg.data(), length);
         logDebug("[STEP 4] Read payload from JS.");
 
-        string appData = getenv("APPDATA");
-        string wallpaperPath = appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
+        string wallpaperPath;
+#ifdef _WIN32
+        const char* appDataEnv = getenv("APPDATA");
+        string appData = appDataEnv ? appDataEnv : "";
+        wallpaperPath = appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
+#else
+        wallpaperPath = getLinuxWallpaperPath();
+#endif
 
         ifstream file(wallpaperPath, ios::binary);
         if (!file) {
