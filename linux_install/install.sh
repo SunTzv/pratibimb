@@ -8,6 +8,20 @@ echo "        Pratibimb Linux Installer"
 echo "========================================="
 echo ""
 
+echo "Before we begin, please install the extension in your browser:"
+echo "1. Go to your browser's extensions page (e.g., brave://extensions)."
+echo "2. Turn on 'Developer mode'."
+echo "3. Click 'Load unpacked' and select the 'extension' folder from this project."
+echo ""
+while true; do
+    read -p "Have you loaded the extension? [Y/n] " yn
+    case $yn in
+        [Yy]* | "" ) echo ""; break;;
+        [Nn]* ) echo "Please load the extension and run this installer again."; exit 1;;
+        * ) echo "Please answer Y or n.";;
+    esac
+done
+
 # 1. Dependency Check
 echo "[1/4] Checking dependencies..."
 if ! command -v g++ &> /dev/null; then
