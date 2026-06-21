@@ -310,11 +310,11 @@ function goAI(q) {
     let pendingData = null;
     
     if (aiEngine === 'chatgpt') {
-        destUrl = 'https://chatgpt.com/?q=' + encodeURIComponent(trimmed);
-        pendingData = { action: 'enter_only' };
+        destUrl = 'https://chatgpt.com/';
+        pendingData = { action: 'paste_and_enter', text: trimmed };
     } else if (aiEngine === 'claude') {
-        destUrl = 'https://claude.ai/new?q=' + encodeURIComponent(trimmed);
-        pendingData = { action: 'enter_only' };
+        destUrl = 'https://claude.ai/new';
+        pendingData = { action: 'paste_and_enter', text: trimmed };
     } else if (aiEngine === 'gemini') {
         destUrl = 'https://gemini.google.com/app';
         pendingData = { action: 'paste_and_enter', text: trimmed };

@@ -53,10 +53,81 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
                 if (isInputReady) {
                     clearInterval(interval);
                     
+                    // We now universally use paste_and_enter to trigger UI states natively
                     if (data.action === 'paste_and_enter') {
                         inputEl.focus();
                         document.execCommand('insertText', false, data.text);
                     }
+                    
+                    // Poll for the exact send button, no fallback heuristics
+                    let submitAttempts = 0;
+                    const submitInterval = setInterval(() => {
+                        submitAttempts++;
+                        if (submitAttempts > 150) { // 15 second timeout to account for slow hydration
+                            clearInterval(submitInterval);
+                            return;
+                        }
+                        
+                        // React/Next.js often completely replaces the DOM node during hydration!
+                        // If our input element is detached, we MUST re-query it!
+                        if (!inputEl || !document.body.contains(inputEl)) {
+                            if (domain.includes('chatgpt.com')) {
+                                inputEl = document.querySelector('#prompt-textarea');
+                            } else if (domain.includes('claude.ai')) {
+                                inputEl = document.querySelector('[contenteditable="true"]');
+                            } else if (domain.includes('gemini.google.com')) {
+                                inputEl = document.querySelector('rich-textarea [contenteditable="true"]') || document.querySelector('.ql-editor');
+                            } else if (domain.includes('grok.com') || domain.includes('x.com')) {
+                                inputEl = document.querySelector('textarea');
+                            } else {
+                                const inputs = document.querySelectorAll('textarea, [contenteditable="true"]');
+                                if (inputs.length > 0) inputEl = inputs[inputs.length - 1];
+                            }
+                        }
+                        
+                        if (!inputEl) return;
+                        
+                        // Wait until the text box has content (either from our paste, or from their URL parameter)
+                        const textContent = (inputEl.value || inputEl.textContent || '').trim();
+                        if (!textContent) return;
+                        
+                        // We have our text! Clear the interval so we only submit once.
+                        clearInterval(submitInterval);
+                        
+                        // Wait 300ms for React/Angular to finish hydrating the "text entered" state
+                        setTimeout(() => {
+                            inputEl.focus();
+                            
+                            // Simulate a native Enter key press
+                            const enterOpts = { 
+                                key: 'Enter', 
+                                code: 'Enter', 
+                                keyCode: 13, 
+                                which: 13, 
+                                bubbles: true, 
+                                cancelable: true, 
+                                composed: true 
+                            };
+                            inputEl.dispatchEvent(new KeyboardEvent('keydown', enterOpts));
+                            inputEl.dispatchEvent(new KeyboardEvent('keypress', enterOpts));
+                            inputEl.dispatchEvent(new KeyboardEvent('keyup', enterOpts));
+                            
+                            // Fallback: If the site explicitly blocks untrusted keyboard events, 
+                            // bypass the key listener and trigger a native DOM form submission.
+                            setTimeout(() => {
+                                const form = inputEl.closest('form');
+                                if (form) {
+                                    try {
+                                        form.requestSubmit();
+                                    } catch (e) {
+                                        form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                                    }
+                                }
+                            }, 200);
+                            
+                        }, 300);
+                        
+                    }, 100);
                 }
             }, 500);
         }
