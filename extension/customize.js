@@ -13,6 +13,7 @@ const headingSel = document.getElementById('sel-heading');
 const normalSel = document.getElementById('sel-normal');
 const greetingSel = document.getElementById('sel-greeting');
 const engineSel = document.getElementById('sel-engine');
+const aiEngineSel = document.getElementById('sel-ai-engine');
 
 const idleAutoToggle = document.getElementById('idle-auto-toggle');
 const idleTimeoutSel = document.getElementById('sel-idle-timeout');
@@ -21,7 +22,7 @@ const recorderBtn = document.getElementById('btn-shortcut-recorder');
 
 // Custom Premium Select Building Logic
 function initCustomSelects() {
-    const selects = [headingSel, normalSel, greetingSel, engineSel, idleTimeoutSel];
+    const selects = [headingSel, normalSel, greetingSel, engineSel, aiEngineSel, idleTimeoutSel];
     
     selects.forEach(select => {
         if (!select) return;
@@ -96,7 +97,7 @@ function initCustomSelects() {
 }
 
 function updateCustomDropdowns() {
-    const selects = [headingSel, normalSel, greetingSel, engineSel, idleTimeoutSel];
+    const selects = [headingSel, normalSel, greetingSel, engineSel, aiEngineSel, idleTimeoutSel];
     selects.forEach(select => {
         if (!select) return;
         const wrapper = document.querySelector(`.nt-select-custom-wrapper[data-select-id="${select.id}"]`);
@@ -127,6 +128,7 @@ headingSel.value = localStorage.getItem('font_heading') || 'Jaro';
 normalSel.value = localStorage.getItem('font_normal') || 'Satoshi';
 greetingSel.value = localStorage.getItem('font_greeting') || 'Tangerine';
 engineSel.value = localStorage.getItem('search_engine') || 'google';
+aiEngineSel.value = localStorage.getItem('ai_engine') || 'chatgpt';
 
 idleAutoToggle.checked = localStorage.getItem('idle_auto') !== 'false';
 idleTimeoutSel.value = localStorage.getItem('idle_timeout') || '10';
@@ -190,7 +192,7 @@ applyStylesLocal();
 
 // 3. Initialize from chrome.storage.local (asynchronous master database sync)
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut'], (res) => {
+    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut'], (res) => {
         if (res.clock24 !== undefined) {
             toggle.checked = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', toggle.checked);
@@ -210,6 +212,10 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
         if (res.search_engine) {
             engineSel.value = res.search_engine;
             localStorage.setItem('search_engine', res.search_engine);
+        }
+        if (res.ai_engine) {
+            aiEngineSel.value = res.ai_engine;
+            localStorage.setItem('ai_engine', res.ai_engine);
         }
         if (res.idle_auto !== undefined) {
             idleAutoToggle.checked = res.idle_auto !== false && res.idle_auto !== 'false';
@@ -235,6 +241,7 @@ function saveSettings() {
     localStorage.setItem('font_normal', normalSel.value);
     localStorage.setItem('font_greeting', greetingSel.value);
     localStorage.setItem('search_engine', engineSel.value);
+    localStorage.setItem('ai_engine', aiEngineSel.value);
     
     localStorage.setItem('idle_auto', idleAutoToggle.checked);
     localStorage.setItem('idle_timeout', idleTimeoutSel.value);
@@ -246,6 +253,7 @@ function saveSettings() {
             font_normal: normalSel.value,
             font_greeting: greetingSel.value,
             search_engine: engineSel.value,
+            ai_engine: aiEngineSel.value,
             idle_auto: idleAutoToggle.checked,
             idle_timeout: idleTimeoutSel.value
         });
@@ -258,6 +266,7 @@ headingSel.addEventListener('change', saveSettings);
 normalSel.addEventListener('change', saveSettings);
 greetingSel.addEventListener('change', saveSettings);
 engineSel.addEventListener('change', saveSettings);
+aiEngineSel.addEventListener('change', saveSettings);
 
 idleAutoToggle.addEventListener('change', () => {
     saveSettings();
@@ -347,6 +356,7 @@ document.getElementById('default-btn').addEventListener('click', () => {
     normalSel.value = 'Satoshi';
     greetingSel.value = 'Tangerine';
     engineSel.value = 'google';
+    aiEngineSel.value = 'chatgpt';
     
     idleAutoToggle.checked = true;
     idleTimeoutSel.value = '10';
@@ -380,6 +390,10 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
             if (changes.search_engine) {
                 engineSel.value = changes.search_engine.newValue;
                 localStorage.setItem('search_engine', engineSel.value);
+            }
+            if (changes.ai_engine) {
+                aiEngineSel.value = changes.ai_engine.newValue;
+                localStorage.setItem('ai_engine', aiEngineSel.value);
             }
             if (changes.idle_auto) {
                 idleAutoToggle.checked = changes.idle_auto.newValue !== false && changes.idle_auto.newValue !== 'false';

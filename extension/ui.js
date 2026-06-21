@@ -15,9 +15,9 @@ let use24Hour      = localStorage.getItem('clock24') !== 'false';
 let idleAuto       = localStorage.getItem('idle_auto') !== 'false';
 let idleTimeout    = parseInt(localStorage.getItem('idle_timeout') || '10') * 1000;
 
-// Async master database sync for clock format, search engine, auto-idle, and timeout
+// Async master database sync for clock format, search engine, ai_engine, auto-idle, and timeout
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'search_engine', 'idle_auto', 'idle_timeout'], (res) => {
+    chrome.storage.local.get(['clock24', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout'], (res) => {
         if (res.clock24 !== undefined) {
             use24Hour = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', use24Hour);
@@ -37,6 +37,9 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             if (searchInput) {
                 searchInput.placeholder = `Search with ${ENGINE_NAMES[res.search_engine] || 'Google'}…`;
             }
+        }
+        if (res.ai_engine !== undefined) {
+            localStorage.setItem('ai_engine', res.ai_engine);
         }
         if (res.idle_auto !== undefined) {
             idleAuto = res.idle_auto !== false && res.idle_auto !== 'false';
@@ -148,6 +151,9 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
                 if (searchInput) {
                     searchInput.placeholder = `Search with ${ENGINE_NAMES[newEngine] || 'Google'}…`;
                 }
+            }
+            if (changes.ai_engine) {
+                localStorage.setItem('ai_engine', changes.ai_engine.newValue || 'chatgpt');
             }
             if (changes.idle_auto) {
                 idleAuto = changes.idle_auto.newValue !== false && changes.idle_auto.newValue !== 'false';
@@ -290,6 +296,42 @@ function go(q) {
     window.location.href = dest;
 }
 
+function goAI(q) {
+    if (!q) return;
+    const trimmed = q.trim();
+    const aiEngine = localStorage.getItem('ai_engine') || 'chatgpt';
+    
+    if (aiEngine === 'perplexity') {
+        window.location.href = 'https://www.perplexity.ai/search?q=' + encodeURIComponent(trimmed);
+        return;
+    }
+    
+    let destUrl = '';
+    let pendingData = null;
+    
+    if (aiEngine === 'chatgpt') {
+        destUrl = 'https://chatgpt.com/?q=' + encodeURIComponent(trimmed);
+        pendingData = { action: 'enter_only' };
+    } else if (aiEngine === 'claude') {
+        destUrl = 'https://claude.ai/new?q=' + encodeURIComponent(trimmed);
+        pendingData = { action: 'enter_only' };
+    } else if (aiEngine === 'gemini') {
+        destUrl = 'https://gemini.google.com/app';
+        pendingData = { action: 'paste_and_enter', text: trimmed };
+    } else if (aiEngine === 'grok') {
+        destUrl = 'https://grok.com/';
+        pendingData = { action: 'paste_and_enter', text: trimmed };
+    }
+    
+    if (pendingData && typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+        chrome.storage.local.set({ pending_ai_data: pendingData }, () => {
+            window.location.href = destUrl;
+        });
+    } else if (destUrl) {
+        window.location.href = destUrl;
+    }
+}
+
 function closeSugs() { box.classList.remove('open'); box.innerHTML = ''; items = []; cur = -1; }
 
 function paintSugs() {
@@ -352,7 +394,14 @@ inp.addEventListener('input', () => {
 inp.addEventListener('keydown', e => {
     if      (e.key === 'ArrowDown')  { e.preventDefault(); cur = Math.min(cur + 1, items.length - 1); if (cur >= 0) inp.value = items[cur]; paintSugs(); }
     else if (e.key === 'ArrowUp')    { e.preventDefault(); cur = Math.max(cur - 1, -1); paintSugs(); }
-    else if (e.key === 'Enter')      { e.preventDefault(); go(cur >= 0 ? items[cur] : inp.value.trim()); }
+    else if (e.key === 'Enter')      { 
+        e.preventDefault(); 
+        if (e.ctrlKey || e.metaKey) {
+            goAI(cur >= 0 ? items[cur] : inp.value.trim());
+        } else {
+            go(cur >= 0 ? items[cur] : inp.value.trim()); 
+        }
+    }
     else if (e.key === 'Escape')     closeSugs();
 });
 
