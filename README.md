@@ -39,13 +39,11 @@ Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here
 
 **What actually works:**
 
-| Setup | Verdict |
-|---|---|
-| Linux (just tested Cinnamon so far) | ✅ CLI setup |
-| Tiny10 / Win10 — Chrome, Brave, Edge | ✅ Perfect |
-| Windows 11 — Edge | ✅ Perfect |
-| Windows 11 — Brave | I FOUND A FIX I'LL UPDATE SOON PROMISE |
-| Windows 11 — Chrome | ✅ Perfect |
+| Operating System | Compatibility |
+| :--- | :--- |
+| **Windows 11** | ✅ Perfect on Chrome, Brave, and Edge |
+| **Windows 10 / Tiny10** | ✅ Perfect on Chrome, Brave, and Edge |
+| **Linux (Cinnamon)** | ✅ Perfect via CLI setup |
 
 ---
 

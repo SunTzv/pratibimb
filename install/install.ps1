@@ -72,11 +72,9 @@ $browsers = @(
 
 foreach ($b in $browsers) {
     $regPath = "HKCU:\$b\com.suntzv.pratibimb"
-    if (Test-Path "HKCU:\$b") {
-        New-Item -Path $regPath -Force | Out-Null
-        New-ItemProperty -Path $regPath -Name "(default)" -Value $manifestPath -Force | Out-Null
-        Write-Host "  -> Registered for $b"
-    }
+    New-Item -Path $regPath -Force | Out-Null
+    New-ItemProperty -Path $regPath -Name "(default)" -Value $manifestPath -Force | Out-Null
+    Write-Host "  -> Registered for $b"
 }
 
 Write-Host ""
