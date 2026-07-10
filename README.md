@@ -52,11 +52,15 @@ Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here
 ## Installation
 
 ### Windows
-[![Download](https://img.shields.io/badge/Download-Pratibimb__Setup.exe-0078D4?style=for-the-badge&logo=windows)](https://github.com/SunTzv/Pratibimb/releases/latest/download/Pratibimb_Setup.exe)
 
-**Step 1** — Run `Pratibimb_Setup.exe`, pick your browser, click **Extract & Open Folder**.
+**Step 1** — Open PowerShell and run this command to install Pratibimb:
+```powershell
+irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1 | iex
+```
 
-**Step 2** — Go to `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, and drag the `extension` folder in. Copy the Extension ID it gives you, paste it back into the installer, and click **Link Native Host**.
+**Step 2** — The script will download and extract the extension, then open the folder. Go to `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, and click **Load unpacked**. Select the opened `extension` folder.
+
+**Step 3** — Copy the Extension ID it gives you, paste it back into the PowerShell window, and hit Enter.
 
 Open a new tab. That's it. 🎉
 
@@ -78,7 +82,11 @@ Open a new tab. That's it. 🎉
 
 ## Uninstalling
 
-**Windows:** Run the installer → Uninstall → **UNINSTALL EVERYTHING**. Removes the host, the registry keys, the AppData folder — all of it. Then remove the extension from your browser. Gone without a trace.
+**Windows:** Open PowerShell and run this command to remove the host and registry keys:
+```powershell
+irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/uninstall.ps1 | iex
+```
+Then remove the extension from your browser. Gone without a trace.
 
 **Linux:** Run `./linux_install/uninstall.sh`. Wipes the generated JSON configs from your browsers and purges the binary from `~/.local/share/Pratibimb`. Remove the extension from your browser. Gone without a trace.
 
