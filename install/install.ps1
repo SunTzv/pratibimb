@@ -110,13 +110,13 @@ Write-Gradient "  ✨ Installation Complete! ✨" 50 255 150 50 150 255 30
 Write-Host ""
 
 Write-Host "  $ESC[38;2;255;255;255mFinal Steps:$ESC[0m"
-Write-Host "  1. The extension folder has been opened for you."
+Write-Host "  1. The Pratibimb folder has been opened for you."
 Write-Host "  2. Go to your browser's extensions page (e.g. $ESC[38;2;100;200;255mchrome://extensions$ESC[0m)"
 Write-Host "  3. Turn on $ESC[38;2;255;200;100m'Developer mode'$ESC[0m."
-Write-Host "  4. Click $ESC[38;2;255;200;100m'Load unpacked'$ESC[0m and select the opened folder."
+Write-Host "  4. Drag and drop the $ESC[38;2;255;200;100m'extension'$ESC[0m folder into the browser (or click 'Load unpacked')."
 Write-Host ""
 Write-Host "  $ESC[38;2;150;255;150mOpen a new tab to see the magic. 🎉$ESC[0m"
 Write-Host ""
 
 Start-Sleep -Milliseconds 500
-Invoke-Item $extDir
+Invoke-Item $installDir
