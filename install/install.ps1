@@ -31,14 +31,10 @@ Write-Host "Before we continue, please install the extension in your browser:"
 Write-Host "1. Go to your browser's extensions page (e.g., chrome://extensions or edge://extensions)."
 Write-Host "2. Turn on 'Developer mode'."
 Write-Host "3. Click 'Load unpacked' and select the opened 'extension' folder."
-Write-Host "4. Copy the generated Extension ID."
 Write-Host ""
 
-$extId = Read-Host "Paste your Extension ID here"
-while ($extId.Length -ne 32 -or $extId -notmatch '^[a-zA-Z]+$') {
-    Write-Host "Invalid Extension ID. It should be 32 alphabetical characters."
-    $extId = Read-Host "Paste your Extension ID here"
-}
+$extId = "cbcdepgnlldcpbigcgjdkmnjcoekggji"
+Write-Host "Extension ID is permanently set to: $extId"
 
 Write-Host "[3/4] Creating Native Messaging Manifest..."
 $manifestPath = "$hostDir\com.suntzv.pratibimb.json"

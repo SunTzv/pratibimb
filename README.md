@@ -58,8 +58,6 @@ irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1 
 
 **Step 2** — The script will download and extract the extension, then open the folder. Go to `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, and click **Load unpacked**. Select the opened `extension` folder.
 
-**Step 3** — Copy the Extension ID it gives you, paste it back into the PowerShell window, and hit Enter.
-
 Open a new tab. That's it. 🎉
 
 ### Linux
