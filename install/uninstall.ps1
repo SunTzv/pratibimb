@@ -8,7 +8,7 @@ function Write-Gradient {
     $len = $text.Length
     if ($len -eq 0) { return }
     $out = ""
-    for ($i = 0; $i < $len; $i++) {
+    for ($i = 0; $i -lt $len; $i++) {
         $r = [Math]::Round($r1 + ($r2 - $r1) * ($i / $len))
         $g = [Math]::Round($g1 + ($g2 - $g1) * ($i / $len))
         $b = [Math]::Round($b1 + ($b2 - $b1) * ($i / $len))
