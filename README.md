@@ -77,6 +77,23 @@ Open a new tab. That's it. 🎉
 
 ---
 
+## Updating
+
+To quickly update just the extension UI (HTML, CSS, JS) without rebuilding the host or re-registering, run:
+
+**Windows:**
+```powershell
+irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/update.ps1 | iex
+```
+
+**Linux:**
+```bash
+curl -sL https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/update.sh | bash
+```
+After running the update command, go to your browser's extensions page and hit the **Update** or reload button on Pratibimb.
+
+---
+
 ## Uninstalling
 
 **Windows:** Open PowerShell and run this command to remove the host and registry keys:

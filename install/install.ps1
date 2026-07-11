@@ -49,21 +49,23 @@ $extDir = "$installDir\extension"
 New-Item -ItemType Directory -Force -Path $hostDir | Out-Null
 New-Item -ItemType Directory -Force -Path $extDir | Out-Null
 
-$repoBase = "https://raw.githubusercontent.com/SunTzv/Pratibimb/main"
-
 Write-Host "  $ESC[38;2;100;150;255m[1/4]$ESC[0m Downloading assets"
-Show-Progress "Fetching host binary"
-Invoke-WebRequest -Uri "$repoBase/host/pratibimb_host.exe" -OutFile "$hostDir\pratibimb_host.exe" -UseBasicParsing
-Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Fetched host binary             "
-
-Show-Progress "Fetching extension package"
-Invoke-WebRequest -Uri "$repoBase/extension.zip" -OutFile "$installDir\extension.zip" -UseBasicParsing
-Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Fetched extension package       "
+Show-Progress "Fetching latest stable release"
+$releaseApiUrl = "https://api.github.com/repos/SunTzv/Pratibimb/releases/latest"
+$releaseInfo = Invoke-RestMethod -Uri $releaseApiUrl
+$zipUrl = $releaseInfo.zipball_url
+Invoke-WebRequest -Uri $zipUrl -OutFile "$installDir\release.zip" -UseBasicParsing
+Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Fetched latest stable release     "
 
 Write-Host "  $ESC[38;2;100;150;255m[2/4]$ESC[0m Extracting contents"
 Show-Progress "Unpacking files"
-Expand-Archive -LiteralPath "$installDir\extension.zip" -DestinationPath $extDir -Force
-Remove-Item "$installDir\extension.zip"
+Expand-Archive -LiteralPath "$installDir\release.zip" -DestinationPath "$installDir\temp" -Force
+Remove-Item "$installDir\release.zip" -Force
+
+$extractedDir = (Get-ChildItem -Path "$installDir\temp" -Directory | Select-Object -First 1).FullName
+Copy-Item -Path "$extractedDir\extension\*" -Destination $extDir -Recurse -Force
+Copy-Item -Path "$extractedDir\host\pratibimb_host.exe" -Destination "$hostDir\pratibimb_host.exe" -Force
+Remove-Item "$installDir\temp" -Recurse -Force
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Unpacked files                  "
 
 Write-Host "  $ESC[38;2;100;150;255m[3/4]$ESC[0m Configuring Native Messaging"

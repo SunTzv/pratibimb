@@ -37,25 +37,23 @@ EXT_DIR="$INSTALL_DIR/extension"
 mkdir -p "$HOST_DIR"
 mkdir -p "$EXT_DIR"
 
-REPO_BASE="https://raw.githubusercontent.com/SunTzv/Pratibimb/main"
+echo -e "  ${BLUE}[2/4]${NC} Downloading latest stable release"
+TMP_DIR=$(mktemp -d)
+LATEST_URL=$(curl -s https://api.github.com/repos/SunTzv/Pratibimb/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
+curl -s -L -o "$TMP_DIR/release.zip" "$LATEST_URL"
+unzip -q -o "$TMP_DIR/release.zip" -d "$TMP_DIR"
+EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)
 
-echo -e "  ${BLUE}[2/4]${NC} Building host executable"
-TMP_BUILD=$(mktemp -d)
-cd "$TMP_BUILD"
-curl -s -O "$REPO_BASE/host/main.cpp"
-curl -s -O "$REPO_BASE/host/stb_image.h"
-curl -s -O "$REPO_BASE/host/stb_image_write.h"
+cp -r "$EXTRACTED_DIR/extension/"* "$EXT_DIR/"
+echo -e "    ${GREEN}✓${NC} Files downloaded and extracted"
+
+echo -e "  ${BLUE}[3/4]${NC} Building host executable"
+cd "$EXTRACTED_DIR/host"
 g++ -O3 -Wall -Wno-ignored-attributes -std=c++14 main.cpp -o pratibimb_host
 mv pratibimb_host "$HOST_DIR/"
 cd ~
-rm -rf "$TMP_BUILD"
+rm -rf "$TMP_DIR"
 echo -e "    ${GREEN}✓${NC} Built and installed host"
-
-echo -e "  ${BLUE}[3/4]${NC} Extracting extension package"
-curl -s -o "$INSTALL_DIR/extension.zip" "$REPO_BASE/extension.zip"
-unzip -q -o "$INSTALL_DIR/extension.zip" -d "$EXT_DIR"
-rm -f "$INSTALL_DIR/extension.zip"
-echo -e "    ${GREEN}✓${NC} Extension extracted"
 
 echo -e "  ${BLUE}[4/4]${NC} Registering browsers"
 EXT_ID="cbcdepgnlldcpbigcgjdkmnjcoekggji"
