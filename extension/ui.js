@@ -310,17 +310,16 @@ function goAI(q) {
     let pendingData = null;
     
     if (aiEngine === 'chatgpt') {
-        destUrl = 'https://chatgpt.com/';
-        pendingData = { action: 'paste_and_enter', text: trimmed };
+        destUrl = 'https://chatgpt.com/?q=' + encodeURIComponent(trimmed);
     } else if (aiEngine === 'claude') {
         destUrl = 'https://claude.ai/new';
-        pendingData = { action: 'paste_and_enter', text: trimmed };
+        pendingData = { action: 'paste_only', text: trimmed };
     } else if (aiEngine === 'gemini') {
         destUrl = 'https://gemini.google.com/app';
-        pendingData = { action: 'paste_and_enter', text: trimmed };
+        pendingData = { action: 'paste_only', text: trimmed };
     } else if (aiEngine === 'grok') {
         destUrl = 'https://grok.com/';
-        pendingData = { action: 'paste_and_enter', text: trimmed };
+        pendingData = { action: 'paste_only', text: trimmed };
     }
     
     if (pendingData && typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
