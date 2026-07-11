@@ -37,6 +37,7 @@ window.applyFonts = function(headingF, normalF, greetingF) {
         .nt-time, .nt-wx-temp, .nt-search-idle-clock { font-family: '${headingF}', sans-serif !important; }
         body, .nt-search, .nt-sug, .nt-link, .nt-date, .nt-wx-info-sub { font-family: '${normalF}', sans-serif !important; }
         .nt-greeting { font-family: '${greetingF}', cursive !important; }
+        ${localStorage.getItem('search_enabled') === 'false' ? '.nt-search-wrap { display: none !important; }' : ''}
     `;
     document.head.appendChild(style);
 };

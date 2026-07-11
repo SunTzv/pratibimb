@@ -9,6 +9,7 @@ document.getElementById('back-btn').addEventListener('click', () => {
 
 // 1. Inputs Selection
 const toggle = document.getElementById('clock-toggle');
+const searchToggle = document.getElementById('search-toggle');
 const headingSel = document.getElementById('sel-heading');
 const normalSel = document.getElementById('sel-normal');
 const greetingSel = document.getElementById('sel-greeting');
@@ -124,6 +125,7 @@ initCustomSelects();
 
 // 2. Initialize from localStorage (fast sync paint)
 toggle.checked = localStorage.getItem('clock24') !== 'false';
+searchToggle.checked = localStorage.getItem('search_enabled') !== 'false';
 headingSel.value = localStorage.getItem('font_heading') || 'Jaro';
 normalSel.value = localStorage.getItem('font_normal') || 'Satoshi';
 greetingSel.value = localStorage.getItem('font_greeting') || 'Tangerine';
@@ -192,10 +194,14 @@ applyStylesLocal();
 
 // 3. Initialize from chrome.storage.local (asynchronous master database sync)
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut'], (res) => {
+    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut', 'search_enabled'], (res) => {
         if (res.clock24 !== undefined) {
             toggle.checked = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', toggle.checked);
+        }
+        if (res.search_enabled !== undefined) {
+            searchToggle.checked = res.search_enabled !== false && res.search_enabled !== 'false';
+            localStorage.setItem('search_enabled', searchToggle.checked);
         }
         if (res.font_heading) {
             headingSel.value = res.font_heading;
@@ -242,6 +248,7 @@ function saveSettings() {
     localStorage.setItem('font_greeting', greetingSel.value);
     localStorage.setItem('search_engine', engineSel.value);
     localStorage.setItem('ai_engine', aiEngineSel.value);
+    localStorage.setItem('search_enabled', searchToggle.checked);
     
     localStorage.setItem('idle_auto', idleAutoToggle.checked);
     localStorage.setItem('idle_timeout', idleTimeoutSel.value);
@@ -254,6 +261,7 @@ function saveSettings() {
             font_greeting: greetingSel.value,
             search_engine: engineSel.value,
             ai_engine: aiEngineSel.value,
+            search_enabled: searchToggle.checked,
             idle_auto: idleAutoToggle.checked,
             idle_timeout: idleTimeoutSel.value
         });
@@ -267,6 +275,7 @@ normalSel.addEventListener('change', saveSettings);
 greetingSel.addEventListener('change', saveSettings);
 engineSel.addEventListener('change', saveSettings);
 aiEngineSel.addEventListener('change', saveSettings);
+searchToggle.addEventListener('change', saveSettings);
 
 idleAutoToggle.addEventListener('change', () => {
     saveSettings();
@@ -352,6 +361,7 @@ if (recorderBtn) {
 // 5. Switch to Default Reset
 document.getElementById('default-btn').addEventListener('click', () => {
     toggle.checked = true;
+    searchToggle.checked = true;
     headingSel.value = 'Jaro';
     normalSel.value = 'Satoshi';
     greetingSel.value = 'Tangerine';
@@ -374,6 +384,10 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
             if (changes.clock24) {
                 toggle.checked = changes.clock24.newValue !== false && changes.clock24.newValue !== 'false';
                 localStorage.setItem('clock24', toggle.checked);
+            }
+            if (changes.search_enabled) {
+                searchToggle.checked = changes.search_enabled.newValue !== false && changes.search_enabled.newValue !== 'false';
+                localStorage.setItem('search_enabled', searchToggle.checked);
             }
             if (changes.font_heading) {
                 headingSel.value = changes.font_heading.newValue;

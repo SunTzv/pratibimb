@@ -17,12 +17,19 @@ let idleTimeout    = parseInt(localStorage.getItem('idle_timeout') || '10') * 10
 
 // Async master database sync for clock format, search engine, ai_engine, auto-idle, and timeout
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout'], (res) => {
+    chrome.storage.local.get(['clock24', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout', 'search_enabled'], (res) => {
         if (res.clock24 !== undefined) {
             use24Hour = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', use24Hour);
             lastTimeStr = "";
             tick();
+        }
+        if (res.search_enabled !== undefined) {
+            localStorage.setItem('search_enabled', res.search_enabled);
+            const searchWrap = document.getElementById('nt-swrap');
+            if (searchWrap) {
+                searchWrap.style.display = (res.search_enabled !== false && res.search_enabled !== 'false') ? '' : 'none';
+            }
         }
         if (res.search_engine !== undefined) {
             localStorage.setItem('search_engine', res.search_engine);
@@ -135,6 +142,12 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
                 const g = (changes.font_greeting ? changes.font_greeting.newValue : null) || localStorage.getItem('font_greeting') || 'Tangerine';
                 if (typeof window.applyFonts === 'function') {
                     window.applyFonts(h, n, g);
+                }
+            }
+            if (changes.search_enabled) {
+                const searchWrap = document.getElementById('nt-swrap');
+                if (searchWrap) {
+                    searchWrap.style.display = (changes.search_enabled.newValue !== false && changes.search_enabled.newValue !== 'false') ? '' : 'none';
                 }
             }
             if (changes.search_engine) {
