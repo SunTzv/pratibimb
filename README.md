@@ -63,18 +63,17 @@ irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1 
 Open a new tab. That's it. 🎉
 
 ### Linux
-[![Download](https://img.shields.io/badge/Download-Pratibimb__Linux.tar.gz-FCC624?style=for-the-badge&logo=linux&logoColor=black)](https://github.com/SunTzv/Pratibimb/releases/latest/download/Pratibimb-Linux.tar.gz)
-[![Download](https://img.shields.io/badge/Download-extension.zip-8A2BE2?style=for-the-badge)](https://github.com/SunTzv/Pratibimb/releases/latest/download/extension.zip)
 
-**Step 1** — Extract the `.tar.gz` archive and navigate into it via your terminal.
+![Linux Installation](assets/others/Linux_Installation.png)
 
-**Step 2** — Go to your browser's extensions page, turn on **Developer mode**, and drag the `extension` folder or extracted `extension.zip` into it.
+**Step 1** — Open your terminal and run this command to install Pratibimb:
+```bash
+curl -sL https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.sh | bash
+```
 
-**Step 3** — Run `./linux_install/install.sh` and hit `Y`. It auto-compiles the C++ host and statically links it to Chrome, Chromium, Brave, and Edge automatically!
+**Step 2** — The script will compile the native host, extract the extension, and automatically register it. Go to your browser's extensions page (e.g. `chrome://extensions`), turn on **Developer mode**, and drag and drop the `extension` folder that opened for you into the browser.
 
 Open a new tab. That's it. 🎉
-
-*(Already ran the script but need an update? Just replace your old `extension` folder with the new one. The host config is fully persistent!)*
 
 ---
 
@@ -86,7 +85,11 @@ irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/uninstall.ps
 ```
 Then remove the extension from your browser. Gone without a trace.
 
-**Linux:** Run `./linux_install/uninstall.sh`. Wipes the generated JSON configs from your browsers and purges the binary from `~/.local/share/Pratibimb`. Remove the extension from your browser. Gone without a trace.
+**Linux:** Open your terminal and run this command:
+```bash
+curl -sL https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/uninstall.sh | bash
+```
+Wipes the generated JSON configs from your browsers and purges the binary from `~/.local/share/Pratibimb`. Remove the extension from your browser. Gone without a trace.
 
 ---
 
