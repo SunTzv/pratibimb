@@ -51,6 +51,8 @@ Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here
 
 ### Windows
 
+![Windows Installation](assets/others/Windows_Installation.png)
+
 **Step 1** — Open PowerShell and run this command to install Pratibimb:
 ```powershell
 irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1 | iex
