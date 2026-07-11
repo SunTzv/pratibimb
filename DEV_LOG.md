@@ -45,6 +45,19 @@ Decided it's time to show some love to the penguin.
 
 ---
 
+### v1.6.4 *(July 10-11, 2026)*
+
+Because maintaining zip files is a waste of human potential.
+
+- Unfortunately I don't offer Pratibimb_Setup.exe anymore, that's cuz I migrated to CLI install lmaoo
+- The installer now pulls the latest release directly from GitHub so I never have to manually make zip files again.
+- Added quick update commands so you can update just the extension without rebuilding the host.
+- The search bar can act as an AI prompt directly by hitting `Ctrl + Enter` while searching.
+- Cleaned up the AI script to just securely paste your prompt without wasting your usage limits.
+- Added icons to the manifest finally looks good now 😭.
+
+---
+
 ## Takeaway
 
 Systems programming is basically:
