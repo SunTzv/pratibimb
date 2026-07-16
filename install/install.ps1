@@ -45,9 +45,11 @@ Start-Sleep -Milliseconds 200
 $installDir = "$env:LOCALAPPDATA\Pratibimb"
 $hostDir = "$installDir\host"
 $extDir = "$installDir\extension"
+$wallpapersDir = "$installDir\wallpapers"
 
 New-Item -ItemType Directory -Force -Path $hostDir | Out-Null
 New-Item -ItemType Directory -Force -Path $extDir | Out-Null
+New-Item -ItemType Directory -Force -Path $wallpapersDir | Out-Null
 
 Write-Host "  $ESC[38;2;100;150;255m[1/4]$ESC[0m Downloading assets"
 Show-Progress "Fetching latest stable release"
@@ -64,6 +66,9 @@ Remove-Item "$installDir\release.zip" -Force
 
 $extractedDir = (Get-ChildItem -Path "$installDir\temp" -Directory | Select-Object -First 1).FullName
 Copy-Item -Path "$extractedDir\extension\*" -Destination $extDir -Recurse -Force
+if (Test-Path "$extractedDir\wallpapers") {
+    Copy-Item -Path "$extractedDir\wallpapers\*" -Destination $wallpapersDir -Recurse -Force
+}
 Copy-Item -Path "$extractedDir\host\pratibimb_host.exe" -Destination "$hostDir\pratibimb_host.exe" -Force
 Remove-Item "$installDir\temp" -Recurse -Force
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Unpacked files                  "

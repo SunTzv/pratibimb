@@ -33,9 +33,11 @@ echo -e "    ${GREEN}✓${NC} Dependencies OK"
 INSTALL_DIR="$HOME/.local/share/Pratibimb"
 HOST_DIR="$INSTALL_DIR/host"
 EXT_DIR="$INSTALL_DIR/extension"
+WALLPAPERS_DIR="$INSTALL_DIR/wallpapers"
 
 mkdir -p "$HOST_DIR"
 mkdir -p "$EXT_DIR"
+mkdir -p "$WALLPAPERS_DIR"
 
 echo -e "  ${BLUE}[2/4]${NC} Downloading latest stable release"
 TMP_DIR=$(mktemp -d)
@@ -45,6 +47,9 @@ unzip -q -o "$TMP_DIR/release.zip" -d "$TMP_DIR"
 EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)
 
 cp -r "$EXTRACTED_DIR/extension/"* "$EXT_DIR/"
+if [ -d "$EXTRACTED_DIR/wallpapers" ]; then
+    cp -r "$EXTRACTED_DIR/wallpapers/"* "$WALLPAPERS_DIR/" 2>/dev/null || true
+fi
 echo -e "    ${GREEN}✓${NC} Files downloaded and extracted"
 
 echo -e "  ${BLUE}[3/4]${NC} Building host executable"
