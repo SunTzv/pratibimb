@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAo+OM8KR5FqryWNNgdnyDDecpRClqFuosHIwC2KOKxmAKJWtzY2cAsTPLNt0rqwNQ971NtmvG5/U/DWuRVrqsbpJyIJkL1XM6SUyHapc73TN/wwtxXGhM8U3NwKRw3wwsS06xMvRjwNH9UlV3YWIqyMrLu7PJqLL87Mz/tRXeT1aCL1w+KuWelsyl8DGn/lzxFYPVzgiDONWS/iVBJe8g9REx78rYJEpK4hvgeVRe7InD6mEjxmBxSXbkhD9LjTb7Q+dKIqgrWB7oR9S/uF+0EMx/rHlPL49cJtIUR58v3xqceSHpXl0pPSwZpxNDyFBkx2Dr066Xob5SDAT0x6mHQQIDAQAB",
   "name": "Pratibimb",
-  "version": "1.6.4",
-  "version_name": "Commit 64",
+  "version": "1.7.2",
+  "version_name": "Commit 72",
   "description": "Syncs your new tab with the Windows desktop wallpaper.",
   "icons": {
     "16": "icons/icon16.png",
