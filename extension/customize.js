@@ -16,6 +16,11 @@ const greetingSel = document.getElementById('sel-greeting');
 const engineSel = document.getElementById('sel-engine');
 const aiEngineSel = document.getElementById('sel-ai-engine');
 
+const autoRotateToggle = document.getElementById('auto-rotate-toggle');
+const autoRotateIntervalSel = document.getElementById('sel-rotate-interval');
+const autoRotateModeSel = document.getElementById('sel-rotate-mode');
+const rotateOptionsBlock = document.getElementById('rotate-options-block');
+
 const idleAutoToggle = document.getElementById('idle-auto-toggle');
 const idleTimeoutSel = document.getElementById('sel-idle-timeout');
 const idleTimeoutBlock = document.getElementById('idle-timeout-block');
@@ -23,7 +28,7 @@ const recorderBtn = document.getElementById('btn-shortcut-recorder');
 
 // Custom Premium Select Building Logic
 function initCustomSelects() {
-    const selects = [headingSel, normalSel, greetingSel, engineSel, aiEngineSel, idleTimeoutSel];
+    const selects = [headingSel, normalSel, greetingSel, engineSel, aiEngineSel, idleTimeoutSel, autoRotateIntervalSel, autoRotateModeSel];
     
     selects.forEach(select => {
         if (!select) return;
@@ -98,7 +103,7 @@ function initCustomSelects() {
 }
 
 function updateCustomDropdowns() {
-    const selects = [headingSel, normalSel, greetingSel, engineSel, aiEngineSel, idleTimeoutSel];
+    const selects = [headingSel, normalSel, greetingSel, engineSel, aiEngineSel, idleTimeoutSel, autoRotateIntervalSel, autoRotateModeSel];
     selects.forEach(select => {
         if (!select) return;
         const wrapper = document.querySelector(`.nt-select-custom-wrapper[data-select-id="${select.id}"]`);
@@ -137,6 +142,22 @@ idleTimeoutSel.value = localStorage.getItem('idle_timeout') || '10';
 if (recorderBtn) {
     recorderBtn.textContent = localStorage.getItem('idle_shortcut') || 'Ctrl + I';
 }
+
+if (autoRotateToggle) autoRotateToggle.checked = localStorage.getItem('auto_rotate_enabled') === 'true';
+if (autoRotateIntervalSel) autoRotateIntervalSel.value = localStorage.getItem('auto_rotate_interval') || '15';
+if (autoRotateModeSel) autoRotateModeSel.value = localStorage.getItem('auto_rotate_mode') || 'shuffle';
+
+function updateAutoRotateUI() {
+    if (!autoRotateToggle || !rotateOptionsBlock) return;
+    if (autoRotateToggle.checked) {
+        rotateOptionsBlock.style.opacity = '1';
+        rotateOptionsBlock.style.pointerEvents = 'all';
+    } else {
+        rotateOptionsBlock.style.opacity = '0.3';
+        rotateOptionsBlock.style.pointerEvents = 'none';
+    }
+}
+updateAutoRotateUI();
 
 function updateIdleUI() {
     if (!idleAutoToggle || !idleTimeoutBlock) return;
@@ -194,7 +215,7 @@ applyStylesLocal();
 
 // 3. Initialize from chrome.storage.local (asynchronous master database sync)
 if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut', 'search_enabled'], (res) => {
+    chrome.storage.local.get(['clock24', 'font_heading', 'font_normal', 'font_greeting', 'search_engine', 'ai_engine', 'idle_auto', 'idle_timeout', 'idle_shortcut', 'search_enabled', 'auto_rotate_enabled', 'auto_rotate_interval', 'auto_rotate_mode'], (res) => {
         if (res.clock24 !== undefined) {
             toggle.checked = res.clock24 !== false && res.clock24 !== 'false';
             localStorage.setItem('clock24', toggle.checked);
@@ -235,8 +256,21 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             localStorage.setItem('idle_shortcut', res.idle_shortcut);
             if (recorderBtn) recorderBtn.textContent = res.idle_shortcut;
         }
+        if (res.auto_rotate_enabled !== undefined) {
+            if (autoRotateToggle) autoRotateToggle.checked = res.auto_rotate_enabled === true || res.auto_rotate_enabled === 'true';
+            localStorage.setItem('auto_rotate_enabled', res.auto_rotate_enabled);
+        }
+        if (res.auto_rotate_interval) {
+            if (autoRotateIntervalSel) autoRotateIntervalSel.value = res.auto_rotate_interval;
+            localStorage.setItem('auto_rotate_interval', res.auto_rotate_interval);
+        }
+        if (res.auto_rotate_mode) {
+            if (autoRotateModeSel) autoRotateModeSel.value = res.auto_rotate_mode;
+            localStorage.setItem('auto_rotate_mode', res.auto_rotate_mode);
+        }
         applyStylesLocal();
         updateIdleUI();
+        updateAutoRotateUI();
     });
 }
 
@@ -252,9 +286,13 @@ function saveSettings() {
     
     localStorage.setItem('idle_auto', idleAutoToggle.checked);
     localStorage.setItem('idle_timeout', idleTimeoutSel.value);
+    
+    if (autoRotateToggle) localStorage.setItem('auto_rotate_enabled', autoRotateToggle.checked);
+    if (autoRotateIntervalSel) localStorage.setItem('auto_rotate_interval', autoRotateIntervalSel.value);
+    if (autoRotateModeSel) localStorage.setItem('auto_rotate_mode', autoRotateModeSel.value);
 
     if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
-        chrome.storage.local.set({
+        let storagePayload = {
             clock24: toggle.checked,
             font_heading: headingSel.value,
             font_normal: normalSel.value,
@@ -264,7 +302,12 @@ function saveSettings() {
             search_enabled: searchToggle.checked,
             idle_auto: idleAutoToggle.checked,
             idle_timeout: idleTimeoutSel.value
-        });
+        };
+        if (autoRotateToggle) storagePayload.auto_rotate_enabled = autoRotateToggle.checked;
+        if (autoRotateIntervalSel) storagePayload.auto_rotate_interval = autoRotateIntervalSel.value;
+        if (autoRotateModeSel) storagePayload.auto_rotate_mode = autoRotateModeSel.value;
+        
+        chrome.storage.local.set(storagePayload);
     }
     applyStylesLocal();
 }
@@ -282,6 +325,15 @@ idleAutoToggle.addEventListener('change', () => {
     updateIdleUI();
 });
 idleTimeoutSel.addEventListener('change', saveSettings);
+
+if (autoRotateToggle) {
+    autoRotateToggle.addEventListener('change', () => {
+        saveSettings();
+        updateAutoRotateUI();
+    });
+}
+if (autoRotateIntervalSel) autoRotateIntervalSel.addEventListener('change', saveSettings);
+if (autoRotateModeSel) autoRotateModeSel.addEventListener('change', saveSettings);
 
 // Interactive Shortcut Keybind Recorder
 let isRecordingShortcut = false;
@@ -422,7 +474,107 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.onChanged)
                 localStorage.setItem('idle_shortcut', changes.idle_shortcut.newValue);
                 if (recorderBtn) recorderBtn.textContent = changes.idle_shortcut.newValue;
             }
+            if (changes.auto_rotate_enabled) {
+                if (autoRotateToggle) autoRotateToggle.checked = changes.auto_rotate_enabled.newValue === true || changes.auto_rotate_enabled.newValue === 'true';
+                localStorage.setItem('auto_rotate_enabled', changes.auto_rotate_enabled.newValue);
+                updateAutoRotateUI();
+            }
+            if (changes.auto_rotate_interval) {
+                if (autoRotateIntervalSel) autoRotateIntervalSel.value = changes.auto_rotate_interval.newValue;
+                localStorage.setItem('auto_rotate_interval', changes.auto_rotate_interval.newValue);
+            }
+            if (changes.auto_rotate_mode) {
+                if (autoRotateModeSel) autoRotateModeSel.value = changes.auto_rotate_mode.newValue;
+                localStorage.setItem('auto_rotate_mode', changes.auto_rotate_mode.newValue);
+            }
             applyStylesLocal();
         }
+    });
+}
+// 7. Wallpaper Engine Logic
+const wallpaperPort = chrome.runtime.connectNative('com.suntzv.pratibimb');
+
+let fullImageBase64 = "";
+let imageMimeType = "image/jpeg";
+let previewBuffers = {};
+
+wallpaperPort.onMessage.addListener((msg) => {
+    if (msg.action === "list_wallpapers" && msg.files) {
+        const grid = document.getElementById('wallpaper-grid');
+        if (!grid) return;
+        grid.innerHTML = "";
+        
+        msg.files.forEach(filename => {
+            const item = document.createElement('div');
+            item.className = 'nt-wallpaper-item';
+            item.id = 'preview-' + filename.replace(/[^a-zA-Z0-9]/g, '_');
+            
+            // Note: Since we don't have thumbnails easily, we just use a placeholder styling, 
+            // but we can add a visual cue for the label.
+            const label = document.createElement('div');
+            label.className = 'nt-wallpaper-label';
+            label.textContent = filename;
+            
+            item.appendChild(label);
+            
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.nt-wallpaper-item').forEach(i => i.classList.remove('selected'));
+                item.classList.add('selected');
+                
+                // Reset chunk buffer for the new wallpaper preview stream
+                fullImageBase64 = "";
+                imageMimeType = "image/jpeg";
+                wallpaperPort.postMessage({ action: "set_wallpaper", filename: filename });
+            });
+            
+            grid.appendChild(item);
+            
+            // Queue preview fetch
+            wallpaperPort.postMessage({ action: "get_preview", filename: filename });
+        });
+    }
+
+    // Handle incoming image chunks for live preview and thumbnails
+    if (msg.chunk !== undefined) {
+        if (msg.filename) {
+            if (!previewBuffers[msg.filename]) {
+                previewBuffers[msg.filename] = { base64: "", mime: "image/jpeg" };
+            }
+            previewBuffers[msg.filename].base64 += msg.chunk;
+            if (msg.mime) previewBuffers[msg.filename].mime = msg.mime;
+            
+            if (msg.done) {
+                const finalUrl = `data:${previewBuffers[msg.filename].mime};base64,${previewBuffers[msg.filename].base64}`;
+                const safeId = 'preview-' + msg.filename.replace(/[^a-zA-Z0-9]/g, '_');
+                const item = document.getElementById(safeId);
+                if (item) {
+                    item.style.backgroundImage = `url('${finalUrl}')`;
+                }
+                delete previewBuffers[msg.filename]; // Free memory
+            }
+        } else {
+            fullImageBase64 += msg.chunk;
+            if (msg.mime) {
+                imageMimeType = msg.mime;
+            }
+            if (msg.done) {
+                const finalImageUrl = `data:${imageMimeType};base64,${fullImageBase64}`;
+                localStorage.setItem('instantWallpaper', finalImageUrl);
+                if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
+                    chrome.storage.local.set({ instantWallpaper: finalImageUrl });
+                }
+                document.documentElement.style.backgroundImage = `url('${finalImageUrl}')`;
+                // UI color palette will be updated when the user opens the new tab.
+            }
+        }
+    }
+});
+
+wallpaperPort.postMessage({ action: "list_wallpapers" });
+
+const openFolderBtn = document.getElementById('open-folder-btn');
+if (openFolderBtn) {
+    openFolderBtn.addEventListener('click', () => {
+        wallpaperPort.postMessage({ action: "open_folder" });
     });
 }

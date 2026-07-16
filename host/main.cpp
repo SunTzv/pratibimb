@@ -3,13 +3,18 @@
 #include <string>
 #include <vector>
 #include <cstdlib>
+#include <algorithm>
 #ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
+#include <windows.h>
 #else
 #include <memory>
 #include <stdexcept>
 #include <array>
+#include <unistd.h>
+#include <limits.h>
+#include <dirent.h>
 #endif
 #include <cstdint>
 
@@ -20,7 +25,6 @@
 
 using namespace std;
 
-// --- AGGRESSIVE LOGGER ---
 void logDebug(const string& msg) {
 #ifdef _WIN32
     const char* tempEnv = getenv("TEMP");
@@ -42,14 +46,35 @@ void sendMessage(const string& jsonResponse) {
     logDebug("[SUCCESS] Sent chunk to browser. Length: " + to_string(len));
 }
 
+string getExecutableDir() {
+#ifdef _WIN32
+    char buffer[MAX_PATH];
+    GetModuleFileNameA(NULL, buffer, MAX_PATH);
+    string path(buffer);
+    return path.substr(0, path.find_last_of("\\/"));
+#else
+    char buffer[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", buffer, PATH_MAX);
+    string path(buffer, (count > 0) ? count : 0);
+    return path.substr(0, path.find_last_of("\\/"));
+#endif
+}
+
+string getWallpapersDir() {
+    string exeDir = getExecutableDir();
+#ifdef _WIN32
+    return exeDir + "\\..\\wallpapers";
+#else
+    return exeDir + "/../wallpapers";
+#endif
+}
+
 #ifndef _WIN32
 string exec(const char* cmd) {
     std::array<char, 128> buffer;
     string result;
     std::unique_ptr<FILE, decltype(&pclose)> pipe(popen(cmd, "r"), pclose);
-    if (!pipe) {
-        throw std::runtime_error("popen() failed!");
-    }
+    if (!pipe) return "";
     while (fgets(buffer.data(), buffer.size(), pipe.get()) != nullptr) {
         result += buffer.data();
     }
@@ -63,6 +88,14 @@ string exec(const char* cmd) {
 }
 
 string getLinuxWallpaperPath() {
+    string currentFile = getExecutableDir() + "/../current_wallpaper.txt";
+    ifstream cf(currentFile);
+    if (cf) {
+        string path;
+        getline(cf, path);
+        if (!path.empty()) return path;
+    }
+    
     const char* desktop = getenv("XDG_CURRENT_DESKTOP");
     string desktopStr = desktop ? desktop : "";
     
@@ -88,20 +121,59 @@ string getLinuxWallpaperPath() {
         string path = exec("gsettings get org.cinnamon.desktop.background picture-uri 2>/dev/null | tr -d \"'\"");
         if (path.rfind("file://", 0) == 0) path = path.substr(7);
         return path;
-    } else if (desktopStr.find("LXDE") != string::npos) {
-        return exec("grep '^wallpaper=' ~/.config/pcmanfm/LXDE/desktop.conf 2>/dev/null | cut -d '=' -f 2");
-    } else if (desktopStr.find("LXQt") != string::npos) {
-        return exec("grep '^icon=' ~/.config/pcmanfm-qt/lxqt/settings.conf 2>/dev/null | cut -d '=' -f 2");
-    } else if (desktopStr.find("Deepin") != string::npos) {
-        string path = exec("dconf read /com/deepin/wrap/gnome/desktop/background/picture-uri 2>/dev/null | tr -d \"'\"");
-        if (path.rfind("file://", 0) == 0) path = path.substr(7);
-        return path;
+    }
+    return "";
+}
+
+void setLinuxWallpaper(const string& path) {
+    const char* desktop = getenv("XDG_CURRENT_DESKTOP");
+    string desktopStr = desktop ? desktop : "";
+    
+    string currentFile = getExecutableDir() + "/../current_wallpaper.txt";
+    ofstream cf(currentFile);
+    if (cf) cf << path;
+
+    if (desktopStr.find("GNOME") != string::npos || desktopStr.find("Unity") != string::npos || desktopStr.find("Pantheon") != string::npos || desktopStr.find("Budgie") != string::npos) {
+        exec(("gsettings set org.gnome.desktop.background picture-uri-dark \"file://" + path + "\"").c_str());
+        exec(("gsettings set org.gnome.desktop.background picture-uri \"file://" + path + "\"").c_str());
+    } else if (desktopStr.find("KDE") != string::npos) {
+        exec(("qdbus org.kde.plasmashell /PlasmaShell org.kde.PlasmaShell.evaluateScript \"var Desktops = desktops(); for (i=0;i<Desktops.length;i++) { d = Desktops[i]; d.wallpaperPlugin = 'org.kde.image'; d.currentConfigGroup = Array('Wallpaper', 'org.kde.image', 'General'); d.writeConfig('Image', 'file://" + path + "'); }\"").c_str());
+    } else if (desktopStr.find("Cinnamon") != string::npos || desktopStr.find("X-Cinnamon") != string::npos) {
+        exec(("gsettings set org.cinnamon.desktop.background picture-uri \"file://" + path + "\"").c_str());
+    }
+}
+#else
+string getWindowsWallpaperPath() {
+    string currentFile = getExecutableDir() + "\\..\\current_wallpaper.txt";
+    ifstream cf(currentFile);
+    if (cf) {
+        string path;
+        getline(cf, path);
+        if (!path.empty()) return path;
+    }
+
+    char path[MAX_PATH];
+    DWORD pathSize = sizeof(path);
+    HKEY hKey;
+    if (RegOpenKeyExA(HKEY_CURRENT_USER, "Control Panel\\Desktop", 0, KEY_READ, &hKey) == ERROR_SUCCESS) {
+        if (RegQueryValueExA(hKey, "Wallpaper", NULL, NULL, (LPBYTE)path, &pathSize) == ERROR_SUCCESS) {
+            RegCloseKey(hKey);
+            return string(path);
+        }
+        RegCloseKey(hKey);
     }
     
-    string fehPath = exec("grep '^feh --bg' ~/.fehbg 2>/dev/null | awk '{print $NF}' | tr -d \"'\"");
-    if (!fehPath.empty()) return fehPath;
+    const char* appDataEnv = getenv("APPDATA");
+    string appData = appDataEnv ? appDataEnv : "";
+    return appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
+}
 
-    return "";
+void setWindowsWallpaper(const string& path) {
+    string currentFile = getExecutableDir() + "\\..\\current_wallpaper.txt";
+    ofstream cf(currentFile);
+    if (cf) cf << path;
+
+    SystemParametersInfoA(SPI_SETDESKWALLPAPER, 0, (void*)path.c_str(), SPIF_UPDATEINIFILE | SPIF_SENDWININICHANGE);
 }
 #endif
 
@@ -142,6 +214,118 @@ void stbi_write_mem(void *context, void *data, int size) {
     buf->insert(buf->end(), ptr, ptr + size);
 }
 
+string extractJsonValue(const string& json, const string& key) {
+    size_t keyPos = json.find("\"" + key + "\"");
+    if (keyPos == string::npos) {
+        keyPos = json.find(key + "\""); // check without starting quote sometimes JS sends {action: "..."}
+        if (keyPos == string::npos) return "";
+    }
+    size_t colonPos = json.find(":", keyPos);
+    if (colonPos == string::npos) return "";
+    size_t quoteStart = json.find("\"", colonPos);
+    if (quoteStart == string::npos) return "";
+    size_t quoteEnd = json.find("\"", quoteStart + 1);
+    if (quoteEnd == string::npos) return "";
+    return json.substr(quoteStart + 1, quoteEnd - quoteStart - 1);
+}
+
+void processGetWallpaper(const string& wallpaperPath, const string& requestedFilename = "") {
+    ifstream file(wallpaperPath, ios::binary);
+    if (!file) {
+        logDebug("[ERROR] Could not find Wallpaper at path: " + wallpaperPath);
+        sendMessage("{\"chunk\": \"\", \"done\": true, \"error\": \"not_found\"}");
+        return;
+    }
+
+    vector<unsigned char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
+    file.close(); 
+    logDebug("[STEP 5] Wallpaper loaded into memory. Size: " + to_string(buffer.size()));
+    
+    bool isGif = false;
+    string mimeType = "image/jpeg";
+    if (wallpaperPath.length() >= 4) {
+        string ext = wallpaperPath.substr(wallpaperPath.length() - 4);
+        for(auto& c : ext) c = tolower(c);
+        if (ext == ".gif") {
+            isGif = true;
+            mimeType = "image/gif";
+        }
+    }
+    if (buffer.size() >= 6 && buffer[0] == 'G' && buffer[1] == 'I' && buffer[2] == 'F') {
+        isGif = true;
+        mimeType = "image/gif";
+    }
+
+    string base64Image;
+    if (isGif) {
+        logDebug("[STEP 6] GIF detected. Skipping JPEG compression.");
+        base64Image = base64_encode(buffer);
+    } else {
+        int width, height, channels;
+        unsigned char* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &width, &height, &channels, 3);
+        if (pixels) {
+            logDebug("[STEP 6] Image parsed by STB. Encoding to JPG...");
+            vector<unsigned char> compressed_buffer;
+            stbi_write_jpg_to_func(stbi_write_mem, &compressed_buffer, width, height, 3, pixels, 80);
+            stbi_image_free(pixels);
+            base64Image = base64_encode(compressed_buffer);
+        } else {
+            logDebug("[WARNING] STB failed to parse image. Falling back to raw base64.");
+            base64Image = base64_encode(buffer);
+        }
+    }
+
+    logDebug("[STEP 7] Base64 encoding complete. Total string length: " + to_string(base64Image.length()));
+
+    size_t chunkSize = 500000; 
+    for (size_t i = 0; i < base64Image.length(); i += chunkSize) {
+        string chunk = base64Image.substr(i, chunkSize);
+        bool isDone = (i + chunkSize >= base64Image.length());
+        
+        string jsonResponse = "{\"chunk\": \"" + chunk + "\", \"done\": " + (isDone ? "true" : "false") + ", \"mime\": \"" + mimeType + "\"";
+        if (!requestedFilename.empty()) {
+            jsonResponse += ", \"filename\": \"" + requestedFilename + "\"";
+        }
+        jsonResponse += "}";
+        sendMessage(jsonResponse);
+    }
+}
+
+void processListWallpapers() {
+    string wDir = getWallpapersDir();
+    vector<string> files;
+    
+#ifdef _WIN32
+    WIN32_FIND_DATAA findData;
+    HANDLE hFind = FindFirstFileA((wDir + "\\*").c_str(), &findData);
+    if (hFind != INVALID_HANDLE_VALUE) {
+        do {
+            string name = findData.cFileName;
+            if (name != "." && name != "..") files.push_back(name);
+        } while (FindNextFileA(hFind, &findData));
+        FindClose(hFind);
+    }
+#else
+    DIR* dir = opendir(wDir.c_str());
+    if (dir != nullptr) {
+        struct dirent* entry;
+        while ((entry = readdir(dir)) != nullptr) {
+            string name = entry->d_name;
+            if (name != "." && name != "..") files.push_back(name);
+        }
+        closedir(dir);
+    }
+#endif
+
+    string jsonResponse = "{\"action\": \"list_wallpapers\", \"files\": [";
+    for (size_t i = 0; i < files.size(); i++) {
+        jsonResponse += "\"" + files[i] + "\"";
+        if (i < files.size() - 1) jsonResponse += ", ";
+    }
+    jsonResponse += "]}";
+    sendMessage(jsonResponse);
+}
+
 int main() {
     logDebug("=====================================");
     logDebug("[STEP 1] Host Executable Launched by Browser!");
@@ -155,67 +339,60 @@ int main() {
     
     logDebug("[STEP 2] Waiting for JavaScript to send a message...");
     
-    // THE HEARTBEAT LOOP
     while (cin.read(reinterpret_cast<char*>(&length), 4)) {
-        if (length == 0) {
-            logDebug("[WARNING] Received empty length block. Skipping.");
-            continue;
-        }
+        if (length == 0) continue;
 
-        logDebug("[STEP 3] Received message length from JS: " + to_string(length));
+        vector<char> msgBuf(length + 1);
+        cin.read(msgBuf.data(), length);
+        msgBuf[length] = '\0';
+        string msg(msgBuf.data());
+        logDebug("[STEP 4] Read payload from JS: " + msg);
 
-        vector<char> msg(length);
-        cin.read(msg.data(), length);
-        logDebug("[STEP 4] Read payload from JS.");
+        string action = extractJsonValue(msg, "action");
+        if (action.empty()) action = extractJsonValue(msg, "text"); // fallback
 
-        string wallpaperPath;
+        if (action == "get_wallpaper") {
 #ifdef _WIN32
-        const char* appDataEnv = getenv("APPDATA");
-        string appData = appDataEnv ? appDataEnv : "";
-        wallpaperPath = appData + "\\Microsoft\\Windows\\Themes\\TranscodedWallpaper";
+            string wallpaperPath = getWindowsWallpaperPath();
 #else
-        wallpaperPath = getLinuxWallpaperPath();
+            string wallpaperPath = getLinuxWallpaperPath();
 #endif
-
-        ifstream file(wallpaperPath, ios::binary);
-        if (!file) {
-            logDebug("[ERROR] Could not find Windows Wallpaper at path.");
-            sendMessage("{\"chunk\": \"\", \"done\": true, \"error\": \"not_found\"}");
-            continue;
+            processGetWallpaper(wallpaperPath);
+        } else if (action == "list_wallpapers") {
+            processListWallpapers();
+        } else if (action == "set_wallpaper") {
+            string filename = extractJsonValue(msg, "filename");
+            string wDir = getWallpapersDir();
+#ifdef _WIN32
+            string fullPath = wDir + "\\" + filename;
+            setWindowsWallpaper(fullPath);
+#else
+            string fullPath = wDir + "/" + filename;
+            setLinuxWallpaper(fullPath);
+#endif
+            processGetWallpaper(fullPath);
+        } else if (action == "get_preview") {
+            string filename = extractJsonValue(msg, "filename");
+            string wDir = getWallpapersDir();
+#ifdef _WIN32
+            string fullPath = wDir + "\\" + filename;
+#else
+            string fullPath = wDir + "/" + filename;
+#endif
+            processGetWallpaper(fullPath, filename);
+        } else if (action == "open_folder") {
+            string wDir = getWallpapersDir();
+#ifdef _WIN32
+            string cmd = "explorer \"" + wDir + "\"";
+            system(cmd.c_str());
+#else
+            string cmd = "xdg-open \"" + wDir + "\" > /dev/null 2>&1 &";
+            system(cmd.c_str());
+#endif
+            sendMessage("{\"action\": \"open_folder\", \"status\": \"success\"}");
         }
-
-        vector<unsigned char> buffer((istreambuf_iterator<char>(file)), istreambuf_iterator<char>());
-        file.close(); 
-        logDebug("[STEP 5] Wallpaper loaded into memory. Size: " + to_string(buffer.size()));
-        
-        int width, height, channels;
-        unsigned char* pixels = stbi_load_from_memory(buffer.data(), buffer.size(), &width, &height, &channels, 3);
-        
-        string base64Image;
-        if (pixels) {
-            logDebug("[STEP 6] Image parsed by STB. Encoding to JPG...");
-            vector<unsigned char> compressed_buffer;
-            stbi_write_jpg_to_func(stbi_write_mem, &compressed_buffer, width, height, 3, pixels, 80);
-            stbi_image_free(pixels);
-            base64Image = base64_encode(compressed_buffer);
-        } else {
-            logDebug("[WARNING] STB failed to parse image. Falling back to raw base64.");
-            base64Image = base64_encode(buffer);
-        }
-
-        logDebug("[STEP 7] Base64 encoding complete. Total string length: " + to_string(base64Image.length()));
-
-        size_t chunkSize = 500000; 
-        for (size_t i = 0; i < base64Image.length(); i += chunkSize) {
-            string chunk = base64Image.substr(i, chunkSize);
-            bool isDone = (i + chunkSize >= base64Image.length());
-            
-            string jsonResponse = "{\"chunk\": \"" + chunk + "\", \"done\": " + (isDone ? "true" : "false") + "}";
-            sendMessage(jsonResponse);
-        }
-        logDebug("[STEP 8] Finished sending all chunks.");
     }
 
-    logDebug("[FATAL] cin.read() failed. Browser closed the connection or pipe broke.");
+    logDebug("[FATAL] cin.read() failed. Browser closed the connection.");
     return 0;
 }

@@ -103,4 +103,29 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             }
         }
     });
+
+    // 5. Live Background & Palette Sync (for Auto-Rotate and background changes)
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local') {
+            if (changes.instantWallpaper) {
+                const newWallpaper = changes.instantWallpaper.newValue;
+                if (newWallpaper) {
+                    localStorage.setItem('instantWallpaper', newWallpaper);
+                    document.documentElement.style.backgroundImage = `url('${newWallpaper}')`;
+                    
+                    // If we are in the new tab page, extract the new color palette live
+                    if (typeof extractAndApplyPalette === 'function') {
+                        extractAndApplyPalette(newWallpaper, true);
+                    }
+                }
+            }
+            if (changes.dynamicPalette) {
+                const newPalette = changes.dynamicPalette.newValue;
+                if (newPalette) {
+                    localStorage.setItem('dynamicPalette', newPalette);
+                    document.documentElement.style.cssText += newPalette;
+                }
+            }
+        }
+    });
 }

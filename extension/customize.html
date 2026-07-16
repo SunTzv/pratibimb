@@ -524,6 +524,51 @@
             50% { box-shadow: 0 0 0 6px var(--accent-glow); }
         }
 
+        /* ── Wallpaper Gallery ── */
+        .nt-wallpaper-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            width: 100%;
+            max-height: 200px;
+            overflow-y: auto;
+            padding-right: 4px;
+        }
+        .nt-wallpaper-grid::-webkit-scrollbar { width: 4px; }
+        .nt-wallpaper-grid::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 4px; }
+        .nt-wallpaper-item {
+            aspect-ratio: 16 / 9;
+            background-color: rgba(255, 255, 255, 0.05);
+            background-size: cover;
+            background-position: center;
+            border-radius: 8px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s ease;
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+        .nt-wallpaper-item:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+        .nt-wallpaper-item.selected {
+            border-color: var(--accent);
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+        .nt-wallpaper-label {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            background: rgba(0, 0, 0, 0.6);
+            color: #fff;
+            font-size: 10px;
+            padding: 4px;
+            text-align: center;
+            border-bottom-left-radius: 6px;
+            border-bottom-right-radius: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(12px); }
             to   { opacity: 1; transform: translateY(0); }
@@ -550,14 +595,63 @@
                 <p class="nt-desc">Tailor your workspace experience. Configure dynamic clock behaviors, active color-mapped search settings, and premium Google typography.</p>
             </div>
             
-            <div class="nt-actions">
+            <div class="nt-actions" style="flex-direction: column; gap: 12px;">
+                <button class="nt-default-btn" id="open-folder-btn">Open Wallpapers Folder</button>
                 <button class="nt-default-btn" id="default-btn">Switch to Default</button>
             </div>
         </div>
 
         <!-- RIGHT PANEL: Settings Scroll Panels -->
         <div class="nt-right-panel">
-            <!-- Card 1: System Settings -->
+            <!-- Card 0: Wallpaper Gallery -->
+            <div class="nt-card">
+                <h2 class="nt-card-title">Wallpaper Gallery</h2>
+                <p class="nt-card-desc">Select a wallpaper to instantly apply it to both your desktop and browser.</p>
+                <div class="nt-wallpaper-grid" id="wallpaper-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+
+            <div class="nt-card">
+                <h2 class="nt-card-title">Auto-Rotate Wallpaper</h2>
+                <p class="nt-card-desc">Automatically cycle your desktop and browser wallpaper on a timer.</p>
+                
+                <div class="nt-setting-row">
+                    <div class="nt-setting-info">
+                        <div class="nt-setting-label">Enable Auto-Rotate</div>
+                        <div class="nt-setting-desc">Runs automatically in the background.</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-rotate-toggle">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                
+                <div class="nt-setting-row" id="rotate-options-block" style="border-bottom: none;">
+                    <div class="nt-setting-info" style="display: flex; gap: 12px; width: 100%;">
+                        <div style="flex: 1;">
+                            <div class="nt-setting-label" style="font-size: 11px; margin-bottom: 6px; opacity: 0.7;">ROTATE INTERVAL</div>
+                            <select id="sel-rotate-interval" class="nt-select-native">
+                                <option value="1">Every 1 Minute</option>
+                                <option value="5">Every 5 Minutes</option>
+                                <option value="15">Every 15 Minutes</option>
+                                <option value="30">Every 30 Minutes</option>
+                                <option value="60">Every 1 Hour</option>
+                                <option value="1440">Every 24 Hours</option>
+                            </select>
+                        </div>
+                        <div style="flex: 1;">
+                            <div class="nt-setting-label" style="font-size: 11px; margin-bottom: 6px; opacity: 0.7;">ROTATE MODE</div>
+                            <select id="sel-rotate-mode" class="nt-select-native">
+                                <option value="shuffle">Shuffle (Random)</option>
+                                <option value="sequential">Sequential (A-Z)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: System Settings -->
             <div class="nt-card">
                 <h2 class="nt-card-title">System Settings</h2>
                 <p class="nt-card-desc">Configure dashboard logic, clock format representation, and search behaviors.</p>

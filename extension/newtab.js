@@ -1,4 +1,5 @@
 let fullImageBase64 = "";
+let imageMimeType = "image/jpeg"; // default
 
 const port = chrome.runtime.connectNative('com.suntzv.pratibimb');
 
@@ -216,8 +217,12 @@ port.onMessage.addListener(function(msg) {
         fullImageBase64 += msg.chunk;
     }
     
+    if (msg.mime) {
+        imageMimeType = msg.mime;
+    }
+    
     if (msg.done) {
-        const finalImageUrl = `data:image/jpeg;base64,${fullImageBase64}`;
+        const finalImageUrl = `data:${imageMimeType};base64,${fullImageBase64}`;
         const currentCache = localStorage.getItem('instantWallpaper');
         
         if (currentCache !== finalImageUrl || !localStorage.getItem('dynamicPalette')) {
@@ -238,4 +243,4 @@ port.onDisconnect.addListener(function() {
     }
 });
 
-port.postMessage({ text: "get_wallpaper" });
+port.postMessage({ action: "get_wallpaper" });
