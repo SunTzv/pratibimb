@@ -20,7 +20,7 @@ echo -e ""
 echo -e "    ${GRAY}Sync your desktop wallpaper to your New Tab page.${NC}"
 echo -e ""
 
-echo -e "  ${BLUE}[1/4]${NC} Checking dependencies"
+echo -e "  ${BLUE}[1/5]${NC} Checking dependencies"
 for cmd in g++ unzip curl; do
     if ! command -v $cmd &> /dev/null; then
         echo -e "    ${RED}✗${NC} Error: $cmd is not installed."
@@ -39,9 +39,20 @@ mkdir -p "$HOST_DIR"
 mkdir -p "$EXT_DIR"
 mkdir -p "$WALLPAPERS_DIR"
 
-echo -e "  ${BLUE}[2/4]${NC} Downloading latest stable release"
+echo -e "  ${BLUE}[2/5]${NC} Select Installation Version"
+echo -e "    1) Stable Release (Recommended)"
+echo -e "    2) Latest Dev Build (main branch)"
+read -p "  Select an option [1]: " VERSION_CHOICE
+
+if [ "$VERSION_CHOICE" == "2" ]; then
+    echo -e "  ${BLUE}[3/5]${NC} Downloading latest dev build..."
+    LATEST_URL="https://github.com/SunTzv/Pratibimb/archive/refs/heads/main.zip"
+else
+    echo -e "  ${BLUE}[3/5]${NC} Downloading latest stable release..."
+    LATEST_URL=$(curl -s https://api.github.com/repos/SunTzv/Pratibimb/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
+fi
+
 TMP_DIR=$(mktemp -d)
-LATEST_URL=$(curl -s https://api.github.com/repos/SunTzv/Pratibimb/releases/latest | grep "zipball_url" | cut -d '"' -f 4)
 curl -s -L -o "$TMP_DIR/release.zip" "$LATEST_URL"
 unzip -q -o "$TMP_DIR/release.zip" -d "$TMP_DIR"
 EXTRACTED_DIR=$(find "$TMP_DIR" -mindepth 1 -maxdepth 1 -type d | head -n 1)
@@ -52,7 +63,7 @@ if [ -d "$EXTRACTED_DIR/wallpapers" ]; then
 fi
 echo -e "    ${GREEN}✓${NC} Files downloaded and extracted"
 
-echo -e "  ${BLUE}[3/4]${NC} Building host executable"
+echo -e "  ${BLUE}[4/5]${NC} Building host executable"
 cd "$EXTRACTED_DIR/host"
 g++ -O3 -Wall -Wno-ignored-attributes -std=c++14 main.cpp -o pratibimb_host
 mv pratibimb_host "$HOST_DIR/"
@@ -60,7 +71,7 @@ cd ~
 rm -rf "$TMP_DIR"
 echo -e "    ${GREEN}✓${NC} Built and installed host"
 
-echo -e "  ${BLUE}[4/4]${NC} Registering browsers"
+echo -e "  ${BLUE}[5/5]${NC} Registering browsers"
 HEX_HASH=$(printf "%s" "$EXT_DIR" | sha256sum | awk '{print $1}')
 EXT_ID=$(echo "$HEX_HASH" | cut -c 1-32 | tr '0-9a-f' 'a-p')
 MANIFEST_PATH="$HOST_DIR/com.suntzv.pratibimb.json"

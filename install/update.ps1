@@ -23,14 +23,11 @@ if (-not (Test-Path $installDir)) {
     exit 1
 }
 
-$releaseApiUrl = "https://api.github.com/repos/SunTzv/Pratibimb/releases/latest"
-
-Write-Host "  $BLUE[1/2]$NC Downloading extension package"
-Show-Progress "Fetching latest stable release"
-$releaseInfo = Invoke-RestMethod -Uri $releaseApiUrl
-$zipUrl = $releaseInfo.zipball_url
+Write-Host "  $BLUE[1/2]$NC Downloading latest code from main branch"
+Show-Progress "Fetching latest code"
+$zipUrl = "https://github.com/SunTzv/Pratibimb/archive/refs/heads/main.zip"
 Invoke-WebRequest -Uri $zipUrl -OutFile "$installDir\release.zip" -UseBasicParsing
-Write-Host "`r    $GREEN✓$NC Fetched latest stable release       "
+Write-Host "`r    $GREEN✓$NC Fetched latest code                 "
 
 Write-Host "  $BLUE[2/2]$NC Updating files"
 Show-Progress "Extracting files"
