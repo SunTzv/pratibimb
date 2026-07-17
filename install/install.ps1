@@ -92,7 +92,11 @@ $hash = $sha256.ComputeHash($bytes)
 $hexStr = [System.BitConverter]::ToString($hash, 0, 16).Replace("-", "").ToLower()
 $extId = ""
 foreach ($c in $hexStr.ToCharArray()) {
-    $extId += [char]([int]$c + ($c -ge 'a' ? 10 : 49))
+    if ($c -ge 'a') {
+        $extId += [char]([int]$c + 10)
+    } else {
+        $extId += [char]([int]$c + 49)
+    }
 }
 
 $manifestPath = "$hostDir\com.suntzv.pratibimb.json"
