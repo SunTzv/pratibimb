@@ -35,6 +35,7 @@ You also get a one-click installer that handles all the annoying registry and Ap
 Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here's what might trip you up:
 
 - **Defender might quietly block it** with zero explanation. If it's not working, add `%LOCALAPPDATA%\Pratibimb` as a Defender exclusion.
+- **Brave / Chromium deletes the extension on restart:** Browsers on Windows flag unpacked extensions that have a Service Worker + New Tab Override as malware. **Our PowerShell installer automatically fixes this** by adding the extension to your Windows `ExtensionInstallAllowlist` Registry Policy. If you ever see it get deleted, re-run the installer and accept the Administrator prompt to apply the whitelist!
 - **Store-installed browsers can't do this at all.** If you got your browser from the Microsoft Store, grab the direct installer from the browser's website instead.
 
 **What actually works:**
@@ -57,6 +58,7 @@ Windows 11 is *very* dramatic about local `.exe` files talking to browsers. Here
 ```powershell
 irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1 | iex
 ```
+*(Note: The script will automatically prompt you for Administrator privileges in order to whitelist the extension in your browser's policies. This is safe and required.)*
 
 **Step 2** — The script will download and extract the extension, then open the folder. Go to `chrome://extensions` (or `edge://extensions`), turn on **Developer mode**, and click **Load unpacked**. Select the opened `extension` folder.
 
