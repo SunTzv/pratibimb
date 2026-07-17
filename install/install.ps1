@@ -51,17 +51,17 @@ New-Item -ItemType Directory -Force -Path $hostDir | Out-Null
 New-Item -ItemType Directory -Force -Path $extDir | Out-Null
 New-Item -ItemType Directory -Force -Path $wallpapersDir | Out-Null
 
-Write-Host "  $ESC[38;2;100;150;255m[1/5]$ESC[0m Select Installation Version"
+Write-Host "  $ESC[38;2;100;150;255m[1/6]$ESC[0m Select Installation Version"
 Write-Host "    1) Stable Release (Recommended)"
 Write-Host "    2) Latest Dev Build (main branch)"
 $versionChoice = Read-Host "  Select an option [1]"
 
 if ($versionChoice -eq "2") {
-    Write-Host "  $ESC[38;2;100;150;255m[2/5]$ESC[0m Downloading latest dev build..."
+    Write-Host "  $ESC[38;2;100;150;255m[2/6]$ESC[0m Downloading latest dev build..."
     Show-Progress "Fetching latest code"
     $zipUrl = "https://github.com/SunTzv/Pratibimb/archive/refs/heads/main.zip"
 } else {
-    Write-Host "  $ESC[38;2;100;150;255m[2/5]$ESC[0m Downloading latest stable release..."
+    Write-Host "  $ESC[38;2;100;150;255m[2/6]$ESC[0m Downloading latest stable release..."
     Show-Progress "Fetching latest stable release"
     $releaseApiUrl = "https://api.github.com/repos/SunTzv/Pratibimb/releases/latest"
     $releaseInfo = Invoke-RestMethod -Uri $releaseApiUrl
@@ -71,7 +71,7 @@ if ($versionChoice -eq "2") {
 Invoke-WebRequest -Uri $zipUrl -OutFile "$installDir\release.zip" -UseBasicParsing
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Download complete                   "
 
-Write-Host "  $ESC[38;2;100;150;255m[3/5]$ESC[0m Extracting contents"
+Write-Host "  $ESC[38;2;100;150;255m[3/6]$ESC[0m Extracting contents"
 Show-Progress "Unpacking files"
 Expand-Archive -LiteralPath "$installDir\release.zip" -DestinationPath "$installDir\temp" -Force
 Remove-Item "$installDir\release.zip" -Force
@@ -85,7 +85,7 @@ Copy-Item -Path "$extractedDir\host\pratibimb_host.exe" -Destination "$hostDir\p
 Remove-Item "$installDir\temp" -Recurse -Force
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Unpacked files                  "
 
-Write-Host "  $ESC[38;2;100;150;255m[4/5]$ESC[0m Configuring Native Messaging"
+Write-Host "  $ESC[38;2;100;150;255m[4/6]$ESC[0m Configuring Native Messaging"
 $bytes = [System.Text.Encoding]::UTF8.GetBytes($extDir)
 $sha256 = [System.Security.Cryptography.SHA256]::Create()
 $hash = $sha256.ComputeHash($bytes)
@@ -118,7 +118,7 @@ Show-Progress "Writing manifest"
 $manifest | Out-File -FilePath $manifestPath -Encoding UTF8
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Manifest created                "
 
-Write-Host "  $ESC[38;2;100;150;255m[5/5]$ESC[0m Registering browsers"
+Write-Host "  $ESC[38;2;100;150;255m[5/6]$ESC[0m Registering browsers"
 $browsers = @(
     "Software\Google\Chrome\NativeMessagingHosts",
     "Software\BraveSoftware\Brave-Browser\NativeMessagingHosts",
@@ -135,6 +135,38 @@ foreach ($b in $browsers) {
     New-ItemProperty -Path $regPath -Name "(default)" -Value $manifestPath -Force | Out-Null
 }
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Registry updated                "
+
+Write-Host "  $ESC[38;2;100;150;255m[6/6]$ESC[0m Whitelisting extension in Browser Policies"
+$policyBrowsers = @(
+    "Software\Policies\Google\Chrome",
+    "Software\Policies\BraveSoftware\Brave",
+    "Software\Policies\Microsoft\Edge",
+    "Software\Policies\Chromium"
+)
+foreach ($pb in $policyBrowsers) {
+    $allowlistPath = "HKCU:\$pb\ExtensionInstallAllowlist"
+    if (-not (Test-Path $allowlistPath)) {
+        New-Item -Path $allowlistPath -Force | Out-Null
+    }
+    
+    $i = 1
+    $alreadyExists = $false
+    while ($true) {
+        $prop = Get-ItemProperty -Path $allowlistPath -Name "$i" -ErrorAction SilentlyContinue
+        if (-not $prop) {
+            break
+        }
+        if ($prop."$i" -eq $extId) {
+            $alreadyExists = $true
+            break
+        }
+        $i++
+    }
+    if (-not $alreadyExists) {
+        Set-ItemProperty -Path $allowlistPath -Name "$i" -Value $extId
+    }
+}
+Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Whitelist policies applied      "
 
 Write-Host ""
 Write-Gradient "  ✨ Installation Complete! ✨" 50 255 150 50 150 255 30
