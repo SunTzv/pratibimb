@@ -143,30 +143,46 @@ $policyBrowsers = @(
     "Software\Policies\Microsoft\Edge",
     "Software\Policies\Chromium"
 )
+
+$policySuccess = $true
 foreach ($pb in $policyBrowsers) {
     $allowlistPath = "HKCU:\$pb\ExtensionInstallAllowlist"
-    if (-not (Test-Path $allowlistPath)) {
-        New-Item -Path $allowlistPath -Force | Out-Null
-    }
-    
-    $i = 1
-    $alreadyExists = $false
-    while ($true) {
-        $prop = Get-ItemProperty -Path $allowlistPath -Name "$i" -ErrorAction SilentlyContinue
-        if (-not $prop) {
-            break
+    try {
+        if (-not (Test-Path $allowlistPath)) {
+            New-Item -Path $allowlistPath -Force -ErrorAction Stop | Out-Null
         }
-        if ($prop."$i" -eq $extId) {
-            $alreadyExists = $true
-            break
+        
+        $i = 1
+        $alreadyExists = $false
+        while ($true) {
+            $prop = Get-ItemProperty -Path $allowlistPath -Name "$i" -ErrorAction SilentlyContinue
+            if (-not $prop) {
+                break
+            }
+            if ($prop."$i" -eq $extId) {
+                $alreadyExists = $true
+                break
+            }
+            $i++
         }
-        $i++
-    }
-    if (-not $alreadyExists) {
-        Set-ItemProperty -Path $allowlistPath -Name "$i" -Value $extId
+        if (-not $alreadyExists) {
+            Set-ItemProperty -Path $allowlistPath -Name "$i" -Value $extId -ErrorAction Stop
+        }
+    } catch [System.UnauthorizedAccessException] {
+        $policySuccess = $false
+        break
+    } catch {
+        $policySuccess = $false
+        break
     }
 }
-Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Whitelist policies applied      "
+
+if ($policySuccess) {
+    Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Whitelist policies applied      "
+} else {
+    Write-Host "`r    $ESC[38;2;255;200;100m!$ESC[0m Could not apply policies (Requires Administrator)"
+    Write-Host "      If Brave removes the extension, please run PowerShell as Administrator."
+}
 
 Write-Host ""
 Write-Gradient "  ✨ Installation Complete! ✨" 50 255 150 50 150 255 30
