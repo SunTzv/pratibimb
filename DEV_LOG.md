@@ -6,18 +6,6 @@ What started as "lemme sync my wallpaper to the browser new tab" accidentally be
 
 ## Release Log
 
-### v1.7.2 *(July 14-17, 2026)*
-
-The 72-hour mind-fking debug session. What was supposed to be a simple "auto-rotate" update turned into a war with Chromium security heuristics.
-
-- Added live wallpaper syncing and auto-rotate features using a `background.js` Service Worker.
-- **The Tragedy:** Adding a Service Worker alongside a New Tab Override triggered Brave's anti-malware heuristic, causing it to aggressively delete the unpacked extension on every restart.
-- **The Red Herring:** Thought it was the static `key` spoofing the store. Removed it. Added a dynamic C# ID generator. It generated the wrong ID, broke Native Messaging completely with a Forbidden error, and Brave *still* deleted it.
-- **The Final Boss Fix:** Reverted everything. Restored the static ID. The real fix? Added a Windows Registry `ExtensionInstallAllowlist` injector to the PowerShell installer that tricks Chromium into thinking the System Administrator mandated the extension. 
-- Updated `install.ps1` to automatically prompt for UAC Admin to apply the whitelist policies because `Software\Policies` is locked down. We won this battle.
-
----
-
 ### v1.0.0 — First Release *(Apr 12, 2026)*
 
 - Fixed native messaging host reading wallpaper path from registry
@@ -67,6 +55,17 @@ Because maintaining zip files is a waste of human potential.
 - The search bar can act as an AI prompt directly by hitting `Ctrl + Enter` while searching.
 - Cleaned up the AI script to just securely paste your prompt without wasting your usage limits.
 - Added icons to the manifest finally looks good now 😭.
+
+---
+
+### v1.7.2 (more like v1.8.2? lol) *(July 14-17, 2026)*
+
+The 72-hour mind-fking debug session. What was supposed to be a simple "auto-rotate and gif support" update turned into a war with Chromium security heuristics, the update didn't even add what I wanted it to add initially.
+
+- Added live wallpaper syncing and auto-rotate features using a `background.js` Service Worker.
+- Added a Windows Registry `ExtensionInstallAllowlist` injector to the PowerShell installer that tricks Chromium into thinking the System Administrator mandated the extension. 
+- Updated `install.ps1` to automatically prompt for UAC Admin to apply the whitelist policies because `Software\Policies` is locked down. We won this battle.
+- this guy helped me test on windows: dennis-rodman91
 
 ---
 
