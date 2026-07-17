@@ -74,7 +74,15 @@ Remove-Item "$installDir\temp" -Recurse -Force
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Unpacked files                  "
 
 Write-Host "  $ESC[38;2;100;150;255m[3/4]$ESC[0m Configuring Native Messaging"
-$extId = "cbcdepgnlldcpbigcgjdkmnjcoekggji"
+$bytes = [System.Text.Encoding]::UTF8.GetBytes($extDir)
+$sha256 = [System.Security.Cryptography.SHA256]::Create()
+$hash = $sha256.ComputeHash($bytes)
+$hexStr = [System.BitConverter]::ToString($hash, 0, 16).Replace("-", "").ToLower()
+$extId = ""
+foreach ($c in $hexStr.ToCharArray()) {
+    $extId += [char]([int]$c + ($c -ge 'a' ? 10 : 49))
+}
+
 $manifestPath = "$hostDir\com.suntzv.pratibimb.json"
 $escapedHostPath = "$hostDir\pratibimb_host.exe" -replace "\\", "\\"
 

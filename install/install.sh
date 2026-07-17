@@ -61,7 +61,8 @@ rm -rf "$TMP_DIR"
 echo -e "    ${GREEN}✓${NC} Built and installed host"
 
 echo -e "  ${BLUE}[4/4]${NC} Registering browsers"
-EXT_ID="cbcdepgnlldcpbigcgjdkmnjcoekggji"
+HEX_HASH=$(printf "%s" "$EXT_DIR" | sha256sum | awk '{print $1}')
+EXT_ID=$(echo "$HEX_HASH" | cut -c 1-32 | tr '0-9a-f' 'a-p')
 MANIFEST_PATH="$HOST_DIR/com.suntzv.pratibimb.json"
 
 cat <<EOF > "$MANIFEST_PATH"
