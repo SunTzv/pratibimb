@@ -37,6 +37,16 @@ Write-Gradient "    ██████╔╝██████╔╝████
 Write-Gradient "    ██╔═══╝ ██╔══██╗██╔══██║   ██║   ██║██╔══██╗██║██║╚██╔╝██║██╔══██╗" 255 110 120 255 210 50 40
 Write-Gradient "    ██║     ██║  ██║██║  ██║   ██║   ██║██████╔╝██║██║ ╚═╝ ██║██████╔╝" 255 130 110 255 230 50 40
 Write-Gradient "    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝╚═════╝ ╚═╝╚═╝     ╚═╝╚═════╝ " 255 150 100 255 255 50 40
+
+# Auto-Elevate to Administrator if not already
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+if (-not $isAdmin) {
+    Write-Host "  $ESC[38;2;255;200;100m!$ESC[0m Requesting Administrator privileges to apply browser policies..."
+    $scriptUrl = "https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1"
+    Start-Process powershell -Verb RunAs -ArgumentList "-NoExit -Command `"irm $scriptUrl | iex`""
+    exit
+}
+
 Write-Host ""
 Write-Host "    $ESC[38;2;150;150;150mSync your desktop wallpaper to your New Tab page.$ESC[0m"
 Write-Host ""
