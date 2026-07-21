@@ -38,15 +38,6 @@ Write-Gradient "    ██╔═══╝ ██╔══██╗██╔═�
 Write-Gradient "    ██║     ██║  ██║██║  ██║   ██║   ██║██████╔╝██║██║ ╚═╝ ██║██████╔╝" 255 130 110 255 230 50 40
 Write-Gradient "    ╚═╝     ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚═╝╚═════╝ ╚═╝╚═╝     ╚═╝╚═════╝ " 255 150 100 255 255 50 40
 
-# Auto-Elevate to Administrator if not already
-$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
-if (-not $isAdmin) {
-    Write-Host "  $ESC[38;2;255;200;100m!$ESC[0m Requesting Administrator privileges to apply browser policies..."
-    $scriptUrl = "https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1"
-    Start-Process powershell -Verb RunAs -ArgumentList "-NoExit -Command `"irm $scriptUrl | iex`""
-    exit
-}
-
 Write-Host ""
 Write-Host "    $ESC[38;2;150;150;150mSync your desktop wallpaper to your New Tab page.$ESC[0m"
 Write-Host ""
@@ -136,43 +127,56 @@ foreach ($b in $browsers) {
 Write-Host "`r    $ESC[38;2;50;255;100m✓$ESC[0m Registry updated                "
 
 Write-Host "  $ESC[38;2;100;150;255m[6/6]$ESC[0m Whitelisting extension in Browser Policies"
-$policyBrowsers = @(
-    "Software\Policies\Google\Chrome",
-    "Software\Policies\BraveSoftware\Brave",
-    "Software\Policies\Microsoft\Edge",
-    "Software\Policies\Chromium"
+$policyScript = @"
+`$extId = '$extId'
+`$policyBrowsers = @(
+    'Software\Policies\Google\Chrome',
+    'Software\Policies\BraveSoftware\Brave',
+    'Software\Policies\Microsoft\Edge',
+    'Software\Policies\Chromium'
 )
+foreach (`$pb in `$policyBrowsers) {
+    `$allowlistPath = `"HKLM:\`$pb\ExtensionInstallAllowlist`"
+    if (-not (Test-Path `$allowlistPath)) {
+        New-Item -Path `$allowlistPath -Force | Out-Null
+    }
+    `$i = 1
+    `$alreadyExists = `$false
+    while (`$true) {
+        `$prop = Get-ItemProperty -Path `$allowlistPath -Name `"`$i`" -ErrorAction SilentlyContinue
+        if (-not `$prop) { break }
+        if (`$prop.`"`$i`" -eq `$extId) { `$alreadyExists = `$true; break }
+        `$i++
+    }
+    if (-not `$alreadyExists) {
+        Set-ItemProperty -Path `$allowlistPath -Name `"`$i`" -Value `$extId -ErrorAction Stop
+    }
+}
+"@
 
-$policySuccess = $true
-foreach ($pb in $policyBrowsers) {
-    $allowlistPath = "HKCU:\$pb\ExtensionInstallAllowlist"
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+$policySuccess = $false
+
+if ($isAdmin) {
     try {
-        if (-not (Test-Path $allowlistPath)) {
-            New-Item -Path $allowlistPath -Force -ErrorAction Stop | Out-Null
-        }
-        
-        $i = 1
-        $alreadyExists = $false
-        while ($true) {
-            $prop = Get-ItemProperty -Path $allowlistPath -Name "$i" -ErrorAction SilentlyContinue
-            if (-not $prop) {
-                break
-            }
-            if ($prop."$i" -eq $extId) {
-                $alreadyExists = $true
-                break
-            }
-            $i++
-        }
-        if (-not $alreadyExists) {
-            Set-ItemProperty -Path $allowlistPath -Name "$i" -Value $extId -ErrorAction Stop
-        }
-    } catch [System.UnauthorizedAccessException] {
-        $policySuccess = $false
-        break
+        Invoke-Command -ScriptBlock ([scriptblock]::Create($policyScript)) -ErrorAction Stop
+        $policySuccess = $true
     } catch {
         $policySuccess = $false
-        break
+    }
+} else {
+    Write-Host "      $ESC[38;2;255;200;100m!$ESC[0m Requesting Administrator privileges to apply browser policies..."
+    $bytes = [System.Text.Encoding]::Unicode.GetBytes($policyScript)
+    $encodedCommand = [Convert]::ToBase64String($bytes)
+    try {
+        $proc = Start-Process powershell -Verb RunAs -ArgumentList "-NoProfile -ExecutionPolicy Bypass -WindowStyle Hidden -EncodedCommand $encodedCommand" -Wait -PassThru -ErrorAction Stop
+        if ($proc.ExitCode -eq 0 -or $proc.ExitCode -eq $null) {
+            $policySuccess = $true
+        } else {
+            $policySuccess = $false
+        }
+    } catch {
+        $policySuccess = $false
     }
 }
 
