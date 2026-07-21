@@ -63,10 +63,12 @@ Because maintaining zip files is a waste of human potential.
 The 72-hour mind-fking debug session. What was supposed to be a simple "auto-rotate and gif support" update turned into a war with Chromium security heuristics, the update didn't even add what I wanted it to add initially.
 
 - Added live wallpaper syncing and auto-rotate features using a `background.js` Service Worker.
-- **The Final Boss Fix:** Reverted everything. Restored the static ID. The real fix? Added a Windows Registry `ExtensionInstallAllowlist` injector to the PowerShell installer that tricks Chromium into thinking the System Administrator mandated the extension. 
-- **The Split-Token Aftermath:** Forcing the whole script to run as Admin broke Native Messaging for standard users (it installed to the Admin's `AppData` and `HKCU`). Refactored the installer to run as the standard user by default, and only silently spawns a UAC-prompted subprocess to inject the policy into `HKLM`.
-- **System-Wide Feature:** Also added smart detection so if an IT Admin *pre-runs* the script elevated, it detects this and automatically performs a system-wide installation (`C:\ProgramData` and `HKLM`), making the extension available to all users on the PC simultaneously. We won this battle.
-- this guy helped me test on windows: dennis-rodman91
+- Chromium flagged the Service Worker as malware and kept deleting the extension on restart. Fun.
+- **The Fix:** Tricked Chromium into thinking the system admin mandated the extension by injecting it into the `ExtensionInstallAllowlist` registry policy.
+- **The Oops:** Forcing the installer to run as Admin broke things for standard users (installed to the wrong `AppData`/`HKCU`).
+- **The Real Fix:** Installer now runs as the normal user by default, and only asks for UAC Admin in a hidden subprocess just for the registry policy.
+- Added smart detection: if you run the script as Admin on purpose, it installs system-wide (`C:\ProgramData`) for all users.
+- This guy helped me test on windows: dennis-rodman91
 
 ---
 
