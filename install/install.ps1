@@ -43,7 +43,16 @@ Write-Host "    $ESC[38;2;150;150;150mSync your desktop wallpaper to your New Ta
 Write-Host ""
 Start-Sleep -Milliseconds 200
 
-$installDir = "$env:LOCALAPPDATA\Pratibimb"
+$isAdmin = ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)
+
+if ($isAdmin) {
+    Write-Host "    $ESC[38;2;255;200;100m!$ESC[0m Running as Administrator. Installing system-wide (All Users)..."
+    $installDir = "$env:ProgramData\Pratibimb"
+    $regRoot = "HKLM"
+} else {
+    $installDir = "$env:LOCALAPPDATA\Pratibimb"
+    $regRoot = "HKCU"
+}
 $hostDir = "$installDir\host"
 $extDir = "$installDir\extension"
 $wallpapersDir = "$installDir\wallpapers"
@@ -120,7 +129,7 @@ $browsers = @(
 
 Show-Progress "Updating registry"
 foreach ($b in $browsers) {
-    $regPath = "HKCU:\$b\com.suntzv.pratibimb"
+    $regPath = "$regRoot:\$b\com.suntzv.pratibimb"
     New-Item -Path $regPath -Force | Out-Null
     New-ItemProperty -Path $regPath -Name "(default)" -Value $manifestPath -Force | Out-Null
 }
