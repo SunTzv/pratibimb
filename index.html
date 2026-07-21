@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pratibimb | Sync Desktop Wallpaper to Browser</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jaro:opsz@6..72&family=Satoshi:wght@400;500;700;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0c10;
+            --surface: rgba(30, 32, 40, 0.6);
+            --surface-hover: rgba(45, 48, 60, 0.8);
+            --text-main: #f5f6f8;
+            --text-muted: #8b90a0;
+            --accent: #5e81ff;
+            --accent-glow: rgba(94, 129, 255, 0.4);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Satoshi', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 15% 50%, rgba(94, 129, 255, 0.08), transparent 25%),
+                radial-gradient(circle at 85% 30%, rgba(188, 94, 255, 0.08), transparent 25%);
+            background-attachment: fixed;
+        }
+
+        /* Typography */
+        h1, h2, h3, .brand {
+            font-family: 'Jaro', sans-serif;
+            font-weight: normal;
+        }
+
+        .brand {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            color: var(--text-main);
+            text-decoration: none;
+            text-transform: uppercase;
+        }
+
+        .brand span {
+            color: var(--accent);
+        }
+
+        /* Layout */
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        header {
+            padding: 40px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .github-link {
+            color: var(--text-muted);
+            text-decoration: none;
+            transition: color 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+
+        .github-link:hover {
+            color: var(--text-main);
+        }
+
+        /* Hero Section */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+        }
+
+        .hero h1 {
+            font-size: 5rem;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            background: linear-gradient(135deg, #fff, #aeb5cc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto 48px;
+        }
+
+        /* Terminal Block */
+        .terminal {
+            background: rgba(10, 11, 15, 0.8);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4), 0 0 0 1px var(--border) inset;
+            backdrop-filter: blur(12px);
+            text-align: left;
+        }
+
+        .terminal code {
+            font-family: 'Consolas', 'Monaco', monospace;
+            color: #aeb5cc;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow-x: auto;
+        }
+
+        .terminal .keyword { color: #ff7b72; }
+        .terminal .string { color: #a5d6ff; }
+
+        .copy-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Satoshi', sans-serif;
+            font-weight: 500;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+            margin-left: 16px;
+        }
+
+        .copy-btn:hover {
+            background: var(--surface-hover);
+            border-color: var(--text-muted);
+        }
+
+        .copy-btn.copied {
+            background: #238636;
+            border-color: #2ea043;
+            color: #fff;
+        }
+
+        /* Showcase Grid */
+        .showcase {
+            padding: 60px 0;
+        }
+
+        .showcase-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        .showcase-item {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            aspect-ratio: 16/9;
+        }
+
+        .showcase-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.4s ease;
+        }
+
+        .showcase-item:hover img {
+            transform: scale(1.02);
+        }
+
+        .showcase-label {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Content Sections */
+        .section {
+            padding: 60px 0;
+        }
+
+        .section h2 {
+            font-size: 2.5rem;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 32px;
+            backdrop-filter: blur(12px);
+        }
+
+        .card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: var(--text-main);
+        }
+
+        .card p {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        /* Install Steps */
+        .install-box {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 40px;
+            margin-bottom: 24px;
+        }
+
+        .install-box h3 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .install-box ol {
+            padding-left: 20px;
+            color: var(--text-muted);
+            margin-bottom: 24px;
+        }
+        
+        .install-box li {
+            margin-bottom: 12px;
+        }
+
+        .install-box li strong {
+            color: var(--text-main);
+        }
+
+        .warning {
+            background: rgba(255, 123, 114, 0.1);
+            border: 1px solid rgba(255, 123, 114, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #ff7b72;
+            font-size: 0.95rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: var(--text-muted);
+            border-top: 1px solid var(--border);
+            margin-top: 60px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 3.5rem; }
+            .showcase-grid { grid-template-columns: 1fr; }
+            .terminal { flex-direction: column; gap: 16px; align-items: stretch; }
+            .terminal code { text-align: center; }
+            .copy-btn { margin-left: 0; justify-content: center; }
+            .install-box { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <a href="#" class="brand">Prati<span>bimb</span></a>
+            <a href="https://github.com/SunTzv/Pratibimb" class="github-link" target="_blank">
+                <svg height="24" width="24" viewBox="0 0 16 16" fill="currentColor">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+                GitHub
+            </a>
+        </header>
+
+        <section class="hero">
+            <h1>Your browser finally has<br>the same energy as your desktop.</h1>
+            <p>Pratibimb (Hindi for reflection) is a Chromium extension that syncs your Windows or Linux desktop wallpaper to your New Tab page — live, automatically, every time.</p>
+            
+            <div class="terminal">
+                <code><span class="keyword">irm</span> <span class="string">https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1</span> | iex</code>
+                <button class="copy-btn" onclick="copyInstall('win')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                    Copy Windows Install
+                </button>
+            </div>
+        </section>
+
+        <section class="showcase">
+            <div class="showcase-grid">
+                <div class="showcase-item">
+                    <img src="assets/hydrated_sap.png" alt="Hydrated Sap Wallpaper">
+                    <div class="showcase-label">Active State</div>
+                </div>
+                <div class="showcase-item">
+                    <img src="assets/night_light.png" alt="Night Light Wallpaper">
+                    <div class="showcase-label">Active State</div>
+                </div>
+                <div class="showcase-item">
+                    <img src="assets/old_town_of_bern.png" alt="Old Town Bern Wallpaper">
+                    <div class="showcase-label">Idle State (Weather & Clock)</div>
+                </div>
+                <div class="showcase-item">
+                    <img src="assets/sakura_canopy.png" alt="Sakura Canopy Wallpaper">
+                    <div class="showcase-label">Idle State</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Why it's better</h2>
+            <div class="features-grid">
+                <div class="card">
+                    <h3>Native C++ Host</h3>
+                    <p>Reads your wallpaper directly from the OS registry (Windows) or dconf/gsettings (Linux) instantly. No heavy background polling, zero lag.</p>
+                </div>
+                <div class="card">
+                    <h3>Adaptive Glassmorphism</h3>
+                    <p>The entire UI reacts to your background. Moody dark wallpaper? Moody UI. Bright summer meadow? Frosted white glass. It adapts seamlessly.</p>
+                </div>
+                <div class="card">
+                    <h3>One-Click Install</h3>
+                    <p>A single PowerShell or Bash command handles everything. It downloads the extension, compiles the host, and registers the browser policies for you.</p>
+                </div>
+            </div>
+        </section>
+
+        <section class="section">
+            <h2>Get Started</h2>
+            
+            <div class="install-box">
+                <h3><img src="https://upload.wikimedia.org/wikipedia/commons/4/48/Windows_logo_-_2012_%28dark_blue%29.svg" height="24" alt="Windows"> Windows 10 & 11</h3>
+                <div class="warning">
+                    <strong>Note:</strong> Browsers on Windows aggressively flag unpacked extensions. Our script automatically adds a registry policy to whitelist it. You will be prompted for Administrator privileges at the end of the script to apply this protection.
+                </div>
+                <ol>
+                    <li>Open <strong>PowerShell</strong> and run the install command below.</li>
+                    <li>The script will download, extract, and open the extension folder for you.</li>
+                    <li>Go to <code>chrome://extensions</code> or <code>edge://extensions</code>, turn on <strong>Developer mode</strong>.</li>
+                    <li>Click <strong>Load unpacked</strong> and select the opened <code>extension</code> folder.</li>
+                </ol>
+                <div class="terminal" style="margin:0;">
+                    <code id="win-cmd"><span class="keyword">irm</span> <span class="string">https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1</span> | iex</code>
+                    <button class="copy-btn" id="win-btn" onclick="copyInstall('win')">Copy</button>
+                </div>
+            </div>
+
+            <div class="install-box">
+                <h3><img src="https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg" height="24" alt="Linux"> Linux (Cinnamon / GNOME)</h3>
+                <ol>
+                    <li>Open your terminal and run the install command below.</li>
+                    <li>The script will compile the native host, extract the extension, and automatically register it.</li>
+                    <li>Go to your browser's extensions page, turn on <strong>Developer mode</strong>.</li>
+                    <li>Drag and drop the <code>extension</code> folder that opened for you into the browser.</li>
+                </ol>
+                <div class="terminal" style="margin:0;">
+                    <code id="lin-cmd"><span class="keyword">curl</span> -sL <span class="string">https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.sh</span> | bash</code>
+                    <button class="copy-btn" id="lin-btn" onclick="copyInstall('lin')">Copy</button>
+                </div>
+            </div>
+        </section>
+
+        <footer>
+            <p>Built with pain, suffering, and C++. <br><br>
+            Favicon by Dupe · Weather icons by Bas Milius · Fonts via TeaTimBuYT</p>
+        </footer>
+    </div>
+
+    <script>
+        function copyInstall(os) {
+            let text = "";
+            let btns = [];
+            
+            if (os === 'win') {
+                text = "irm https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.ps1 | iex";
+                // Select both hero and install section buttons for windows
+                btns = document.querySelectorAll('button[onclick="copyInstall(\'win\')"]');
+            } else {
+                text = "curl -sL https://raw.githubusercontent.com/SunTzv/Pratibimb/main/install/install.sh | bash";
+                btns = document.querySelectorAll('button[onclick="copyInstall(\'lin\')"]');
+            }
+
+            navigator.clipboard.writeText(text).then(() => {
+                btns.forEach(btn => {
+                    const originalHTML = btn.innerHTML;
+                    btn.classList.add('copied');
+                    btn.innerHTML = 'Copied!';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = originalHTML;
+                    }, 2000);
+                });
+            });
+        }
+    </script>
+</body>
+</html>
