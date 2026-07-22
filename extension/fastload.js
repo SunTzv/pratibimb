@@ -73,14 +73,23 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
             }
         }
 
-        if (res.dynamicPalette !== undefined && res.dynamicPalette !== palette) {
-            localStorage.setItem('dynamicPalette', res.dynamicPalette);
-            document.documentElement.style.cssText += res.dynamicPalette;
-        }
-
+        let wallpaperChanged = false;
         if (res.instantWallpaper !== undefined && res.instantWallpaper !== fastCache) {
             localStorage.setItem('instantWallpaper', res.instantWallpaper);
             document.documentElement.style.backgroundImage = `url('${res.instantWallpaper}')`;
+            wallpaperChanged = true;
+        }
+
+        if (wallpaperChanged) {
+            if (typeof extractAndApplyPalette === 'function') {
+                extractAndApplyPalette(res.instantWallpaper, true);
+            } else {
+                localStorage.removeItem('dynamicPalette');
+                chrome.storage.local.remove('dynamicPalette');
+            }
+        } else if (res.dynamicPalette !== undefined && res.dynamicPalette !== palette) {
+            localStorage.setItem('dynamicPalette', res.dynamicPalette);
+            document.documentElement.style.cssText += res.dynamicPalette;
         }
 
         if (needsUpdate) {
@@ -113,13 +122,15 @@ if (typeof chrome !== 'undefined' && chrome.storage && chrome.storage.local) {
                     localStorage.setItem('instantWallpaper', newWallpaper);
                     document.documentElement.style.backgroundImage = `url('${newWallpaper}')`;
                     
-                    // If we are in the new tab page, extract the new color palette live
                     if (typeof extractAndApplyPalette === 'function') {
                         extractAndApplyPalette(newWallpaper, true);
+                    } else {
+                        localStorage.removeItem('dynamicPalette');
+                        chrome.storage.local.remove('dynamicPalette');
                     }
                 }
             }
-            if (changes.dynamicPalette) {
+            if (changes.dynamicPalette && !changes.instantWallpaper) {
                 const newPalette = changes.dynamicPalette.newValue;
                 if (newPalette) {
                     localStorage.setItem('dynamicPalette', newPalette);
