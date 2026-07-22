@@ -129,7 +129,7 @@ $browsers = @(
 
 Show-Progress "Updating registry"
 foreach ($b in $browsers) {
-    $regPath = "$regRoot:\$b\com.suntzv.pratibimb"
+    $regPath = "${regRoot}:\$b\com.suntzv.pratibimb"
     New-Item -Path $regPath -Force | Out-Null
     New-ItemProperty -Path $regPath -Name "(default)" -Value $manifestPath -Force | Out-Null
 }
