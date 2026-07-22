@@ -58,8 +58,9 @@ Because maintaining zip files is a waste of human potential.
 
 ---
 
-### v1.7.2 (more like v1.9.2? lol) *(July 14-17, 2026)*
-
+### v1.7.2 (more like v1.9.2? lol) *(July 14-17, 2026)* 
+> SECRETLY WORKED ON IT ON JULY 22 AS WELL
+ 
 The 72-hour mind-fking debug session. What was supposed to be a simple "auto-rotate and gif support" update turned into a war with Chromium security heuristics, the update didn't even add what I wanted it to add initially.
 
 - Added live wallpaper syncing and auto-rotate features using a `background.js` Service Worker.
