@@ -384,10 +384,12 @@ int main() {
             string wDir = getWallpapersDir();
 #ifdef _WIN32
             string cmd = "explorer \"" + wDir + "\"";
-            system(cmd.c_str());
+            int ret = system(cmd.c_str());
+            (void)ret;
 #else
             string cmd = "xdg-open \"" + wDir + "\" > /dev/null 2>&1 &";
-            system(cmd.c_str());
+            int ret = system(cmd.c_str());
+            (void)ret;
 #endif
             sendMessage("{\"action\": \"open_folder\", \"status\": \"success\"}");
         }
