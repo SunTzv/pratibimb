@@ -58,7 +58,7 @@ Because maintaining zip files is a waste of human potential.
 
 ---
 
-### v1.7.2 (more like v1.8.2? lol) *(July 14-17, 2026)*
+### v1.7.2 (more like v1.9.2? lol) *(July 14-17, 2026)*
 
 The 72-hour mind-fking debug session. What was supposed to be a simple "auto-rotate and gif support" update turned into a war with Chromium security heuristics, the update didn't even add what I wanted it to add initially.
 
@@ -69,6 +69,8 @@ The 72-hour mind-fking debug session. What was supposed to be a simple "auto-rot
 - **The Real Fix:** Installer now runs as the normal user by default, and only asks for UAC Admin in a hidden subprocess just for the registry policy.
 - Added smart detection: if you run the script as Admin on purpose, it installs system-wide (`C:\ProgramData`) for all users.
 - This guy helped me test on windows: dennis-rodman91
+- 1.9.2 installation script fixes and color sync was not working from the browser based sync
+
 
 ---
 
