@@ -42,7 +42,7 @@ mkdir -p "$WALLPAPERS_DIR"
 echo -e "  ${BLUE}[2/5]${NC} Select Installation Version"
 echo -e "    1) Stable Release (Recommended)"
 echo -e "    2) Latest Dev Build (main branch)"
-read -p "  Select an option [1]: " VERSION_CHOICE
+read -p "  Select an option [1]: " VERSION_CHOICE < /dev/tty
 
 if [ "$VERSION_CHOICE" == "2" ]; then
     echo -e "  ${BLUE}[3/5]${NC} Downloading latest dev build..."
