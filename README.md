@@ -119,4 +119,4 @@ Wipes the generated JSON configs from your browsers and purges the binary from `
 
 ---
 
-<sub>Favicon by Dupe (dupe_dupe on Discord) · Weather icons by <a href="https://basmilius.github.io/meteocons/fill.html">Bas Milius</a> · Fonts via <a href="https://github.com/TeaTimBuYT">TeaTimBuYT</a></sub>
+<sub>Favicon by Dupe (dupe_dupe on Discord) · Weather icons by <a href="https://basmilius.github.io/meteocons/fill.html">Bas Milius</a> · Fonts via <a href="https://github.com/AdvitSharma28/">Advit Sharma</a></sub>
